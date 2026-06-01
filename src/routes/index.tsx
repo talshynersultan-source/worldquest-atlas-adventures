@@ -1,29 +1,221 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import heroImg from "@/assets/hero-world.jpg";
+import { LEVELS, checkAnswer, rankFor } from "@/lib/levels";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "🌍 World Quest: Geography Adventure" },
+      { name: "description", content: "Travel the world and learn geography by identifying famous landmarks." },
+      { property: "og:title", content: "🌍 World Quest" },
+      { property: "og:description", content: "An educational travel adventure game." },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
+type Screen = "home" | "level" | "summary" | "end";
+const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
+
 function Index() {
+  const [screen, setScreen] = useState<Screen>("home");
+  const [levelIdx, setLevelIdx] = useState(0);
+  const [qIdx, setQIdx] = useState(0);
+  const [input, setInput] = useState("");
+  const [score, setScore] = useState(0);
+  const [money, setMoney] = useState(0);
+  const [feedback, setFeedback] = useState<null | { kind: "correct" | "close" | "wrong"; msg: string; explain: string; gain: number }>(null);
+  const [levelCorrect, setLevelCorrect] = useState(0);
+
+  const level = LEVELS[levelIdx];
+  const question = level?.questions[qIdx];
+
+  const start = () => {
+    setScreen("level"); setLevelIdx(0); setQIdx(0); setScore(0); setMoney(0);
+    setInput(""); setFeedback(null); setLevelCorrect(0);
+  };
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (feedback) return;
+    const res = checkAnswer(input, question.answers);
+    let gain = 0;
+    let msg = "";
+    if (res === "correct") { gain = 10; msg = "Correct! ✅"; setLevelCorrect((c) => c + 1); }
+    else if (res === "close") { gain = 5; msg = "So close! 🤏"; }
+    else { gain = 0; msg = "Not quite. ❌"; }
+    setScore((s) => s + gain);
+    setMoney((m) => m + Math.floor(gain / 2));
+    setFeedback({ kind: res, msg, explain: question.explain, gain });
+  };
+
+  const next = () => {
+    setInput(""); setFeedback(null);
+    if (qIdx < 2) { setQIdx(qIdx + 1); return; }
+    // end of level
+    if (levelCorrect + (feedback?.kind === "correct" ? 0 : 0) === 3 || levelCorrect === 3) {
+      // bonus already if 3 — but levelCorrect updated; check via state directly
+    }
+    setScreen("summary");
+  };
+
+  const goNextLevel = () => {
+    if (levelCorrect === 3) {
+      setScore((s) => s + 20);
+      setMoney((m) => m + 10);
+    }
+    if (levelIdx + 1 >= LEVELS.length) { setScreen("end"); return; }
+    setLevelIdx(levelIdx + 1); setQIdx(0); setLevelCorrect(0); setScreen("level");
+  };
+
+  if (screen === "home") {
+    return (
+      <div className="relative min-h-screen overflow-hidden">
+        <img src={heroImg} alt="World landmarks collage" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background/90" />
+        <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center">
+          <div className="mb-4 flex flex-wrap justify-center gap-2 text-3xl">
+            {FLAGS.map((f) => <span key={f} className="drop-shadow-lg">{f}</span>)}
+          </div>
+          <h1 className="text-6xl font-black tracking-tight text-foreground drop-shadow-md md:text-8xl">
+            🌍 WORLD QUEST
+          </h1>
+          <p className="mt-4 max-w-xl text-lg text-foreground/80 md:text-xl">
+            A geography adventure across the world's greatest landmarks.
+          </p>
+          <Button
+            onClick={start}
+            className="mt-10 h-16 rounded-full bg-primary px-12 text-2xl font-bold text-primary-foreground shadow-2xl transition hover:scale-105"
+          >
+            ▶️ PLAY
+          </Button>
+          <p className="mt-6 text-sm text-foreground/70">7 stops · 21 questions · 1 world</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (screen === "end") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-accent/40 via-background to-secondary/30 px-6 py-20">
+        <div className="mx-auto max-w-2xl rounded-3xl border-2 border-primary/20 bg-card p-10 text-center shadow-2xl">
+          <div className="text-6xl">🏁</div>
+          <h2 className="mt-4 text-4xl font-black">Journey Complete!</h2>
+          <div className="mt-8 grid grid-cols-2 gap-4">
+            <div className="rounded-2xl bg-accent/30 p-6">
+              <div className="text-sm uppercase tracking-wide">Score</div>
+              <div className="text-4xl font-black">{score} ⭐</div>
+            </div>
+            <div className="rounded-2xl bg-secondary/30 p-6">
+              <div className="text-sm uppercase tracking-wide">Money</div>
+              <div className="text-4xl font-black">{money} 💸</div>
+            </div>
+          </div>
+          <div className="mt-8 text-2xl font-bold">{rankFor(score)}</div>
+          <Button onClick={() => setScreen("home")} className="mt-8 h-12 rounded-full px-8 text-lg">
+            Travel again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (screen === "summary") {
+    const allRight = levelCorrect === 3;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-secondary/30 to-accent/30 px-4 py-10">
+        <div className="mx-auto max-w-2xl rounded-3xl bg-card p-8 shadow-xl">
+          <div className="text-center text-5xl">{level.flag}</div>
+          <h2 className="mt-2 text-center text-3xl font-black">{level.monument}</h2>
+          <p className="text-center text-muted-foreground">{level.city}, {level.country}</p>
+          <div className="mt-6 rounded-2xl bg-accent/20 p-4">
+            <div className="text-sm font-bold uppercase tracking-wide text-foreground/70">🎓 Fun Fact</div>
+            <p className="mt-1">{level.fact}</p>
+          </div>
+          <div className="mt-4 rounded-2xl bg-secondary/20 p-4">
+            <div className="text-sm font-bold uppercase tracking-wide text-foreground/70">📚 Vocabulary</div>
+            <p className="mt-1 font-medium">{level.vocab.join(" · ")}</p>
+          </div>
+          <div className="mt-4 text-center">
+            <div className="text-lg">You got <b>{levelCorrect}/3</b> correct.</div>
+            {allRight && <div className="mt-1 font-bold text-primary">🎉 Level bonus: +20 points · +10 💸</div>}
+          </div>
+          <Button onClick={goNextLevel} className="mt-6 h-12 w-full rounded-full text-lg">
+            {levelIdx + 1 >= LEVELS.length ? "Finish journey 🏁" : "Travel to next stop ✈️"}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // level screen
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-gradient-to-br from-secondary/20 via-background to-accent/20">
+      <div className="mx-auto max-w-4xl px-4 py-6">
+        {/* HUD */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-full bg-card px-5 py-3 shadow">
+          <div className="font-bold">Level {level.id} / {LEVELS.length}</div>
+          <div className="flex items-center gap-4 text-sm">
+            <span>⭐ {score}</span>
+            <span>💸 {money}</span>
+            <span>{level.flag} {level.country}</span>
+          </div>
+        </div>
+
+        {/* Image */}
+        <div className="overflow-hidden rounded-3xl shadow-xl">
+          <img src={level.image} alt={level.monument} className="h-72 w-full object-cover md:h-96" />
+        </div>
+
+        {/* NPC */}
+        <div className="mt-4 rounded-2xl border-l-4 border-primary bg-card p-4 shadow">
+          <div className="text-sm font-bold text-primary">{level.npc}</div>
+          <p className="text-sm">{level.intro}</p>
+        </div>
+
+        {/* Question */}
+        <div className="mt-4 rounded-3xl bg-card p-6 shadow-xl">
+          <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Question {qIdx + 1} of 3
+          </div>
+          <h3 className="mt-1 text-2xl font-black">{question.q}</h3>
+
+          <form onSubmit={submit} className="mt-4 flex gap-2">
+            <Input
+              autoFocus
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type your answer..."
+              disabled={!!feedback}
+              className="h-12 text-lg"
+            />
+            <Button type="submit" disabled={!!feedback || !input.trim()} className="h-12 px-6 text-lg">
+              Submit
+            </Button>
+          </form>
+
+          {feedback && (
+            <div className={`mt-4 rounded-2xl p-4 ${
+              feedback.kind === "correct" ? "bg-primary/15"
+              : feedback.kind === "close" ? "bg-accent/30" : "bg-destructive/15"
+            }`}>
+              <div className="text-lg font-bold">{feedback.msg}</div>
+              <div className="text-sm">{feedback.explain}</div>
+              {feedback.gain > 0 && (
+                <div className="mt-1 text-sm font-bold">
+                  You earned +{feedback.gain} points ⭐ · +{Math.floor(feedback.gain / 2)} money 💸
+                </div>
+              )}
+              <Button onClick={next} className="mt-3 rounded-full">
+                {qIdx < 2 ? "Next question →" : "See results →"}
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
