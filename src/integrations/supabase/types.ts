@@ -17,22 +17,37 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          current_level_idx: number
+          current_question_idx: number
           display_name: string | null
           id: string
+          level_correct: number
+          total_money: number
+          total_score: number
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          current_level_idx?: number
+          current_question_idx?: number
           display_name?: string | null
           id?: string
+          level_correct?: number
+          total_money?: number
+          total_score?: number
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          current_level_idx?: number
+          current_question_idx?: number
           display_name?: string | null
           id?: string
+          level_correct?: number
+          total_money?: number
+          total_score?: number
           updated_at?: string
           user_id?: string
         }

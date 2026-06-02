@@ -42,14 +42,19 @@ function Index() {
     if (!user) { setDisplayName(""); setCompletedLevels(new Set()); return; }
     (async () => {
       const [{ data: profile }, { data: progress }] = await Promise.all([
-        supabase.from("profiles").select("display_name").eq("user_id", user.id).maybeSingle(),
+        supabase.from("profiles").select("display_name, current_level_idx, current_question_idx, total_score, total_money, level_correct").eq("user_id", user.id).maybeSingle(),
         supabase.from("user_progress").select("level_id, score, money").eq("user_id", user.id),
       ]);
       setDisplayName(profile?.display_name ?? user.email?.split("@")[0] ?? "Traveler");
+      if (profile) {
+        setLevelIdx(profile.current_level_idx ?? 0);
+        setQIdx(profile.current_question_idx ?? 0);
+        setLevelCorrect(profile.level_correct ?? 0);
+        setScore(profile.total_score ?? 0);
+        setMoney(profile.total_money ?? 0);
+      }
       if (progress) {
         setCompletedLevels(new Set(progress.map((p) => p.level_id)));
-        setScore(progress.reduce((s, p) => s + p.score, 0));
-        setMoney(progress.reduce((s, p) => s + p.money, 0));
       }
     })();
   }, [user]);
@@ -58,33 +63,54 @@ function Index() {
   const question = level?.questions[qIdx];
 
   const start = () => {
-    // Resume at first uncompleted level
-    const firstIncomplete = LEVELS.findIndex((l) => !completedLevels.has(l.id));
     setScreen("level");
-    setLevelIdx(firstIncomplete === -1 ? 0 : firstIncomplete);
-    setQIdx(0);
-    setInput(""); setFeedback(null); setLevelCorrect(0);
+    setInput(""); setFeedback(null);
+  };
+
+  type PlayerStatePatch = Partial<{
+    current_level_idx: number;
+    current_question_idx: number;
+    total_score: number;
+    total_money: number;
+    level_correct: number;
+  }>;
+  const savePlayerState = async (patch: PlayerStatePatch) => {
+    if (!user) return;
+    await supabase.from("profiles").update(patch).eq("user_id", user.id);
   };
 
   const signOut = async () => { await supabase.auth.signOut(); };
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (feedback) return;
     const res = checkAnswer(input, question.answers);
     let gain = 0;
     let msg = "";
-    if (res === "correct") { gain = 10; msg = "Correct! ✅"; setLevelCorrect((c) => c + 1); }
+    let newLevelCorrect = levelCorrect;
+    if (res === "correct") { gain = 10; msg = "Correct! ✅"; newLevelCorrect = levelCorrect + 1; setLevelCorrect(newLevelCorrect); }
     else if (res === "close") { gain = 5; msg = "So close! 🤏"; }
     else { gain = 0; msg = "Not quite. ❌"; }
-    setScore((s) => s + gain);
-    setMoney((m) => m + Math.floor(gain / 2));
+    const newScore = score + gain;
+    const newMoney = money + Math.floor(gain / 2);
+    setScore(newScore);
+    setMoney(newMoney);
     setFeedback({ kind: res, msg, explain: question.explain, gain });
+    void savePlayerState({
+      total_score: newScore,
+      total_money: newMoney,
+      level_correct: newLevelCorrect,
+    });
   };
 
   const next = () => {
     setInput(""); setFeedback(null);
-    if (qIdx < 2) { setQIdx(qIdx + 1); return; }
+    if (qIdx < 2) {
+      const nq = qIdx + 1;
+      setQIdx(nq);
+      void savePlayerState({ current_question_idx: nq });
+      return;
+    }
     // Save level progress to backend
     void saveLevelProgress();
     setScreen("summary");
@@ -106,12 +132,28 @@ function Index() {
   };
 
   const goNextLevel = () => {
+    let newScore = score;
+    let newMoney = money;
     if (levelCorrect === 3) {
-      setScore((s) => s + 20);
-      setMoney((m) => m + 10);
+      newScore = score + 20;
+      newMoney = money + 10;
+      setScore(newScore);
+      setMoney(newMoney);
     }
-    if (levelIdx + 1 >= LEVELS.length) { setScreen("end"); return; }
-    setLevelIdx(levelIdx + 1); setQIdx(0); setLevelCorrect(0); setScreen("level");
+    if (levelIdx + 1 >= LEVELS.length) {
+      void savePlayerState({ total_score: newScore, total_money: newMoney });
+      setScreen("end");
+      return;
+    }
+    const nl = levelIdx + 1;
+    setLevelIdx(nl); setQIdx(0); setLevelCorrect(0); setScreen("level");
+    void savePlayerState({
+      current_level_idx: nl,
+      current_question_idx: 0,
+      level_correct: 0,
+      total_score: newScore,
+      total_money: newMoney,
+    });
   };
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center">🌍 Loading...</div>;
