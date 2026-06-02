@@ -67,7 +67,14 @@ function Index() {
     setInput(""); setFeedback(null);
   };
 
-  const savePlayerState = async (patch: Record<string, number>) => {
+  type PlayerStatePatch = Partial<{
+    current_level_idx: number;
+    current_question_idx: number;
+    total_score: number;
+    total_money: number;
+    level_correct: number;
+  }>;
+  const savePlayerState = async (patch: PlayerStatePatch) => {
     if (!user) return;
     await supabase.from("profiles").update(patch).eq("user_id", user.id);
   };
