@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import heroImg from "@/assets/hero-world.jpg";
 import { LEVELS, checkAnswer, rankFor } from "@/lib/levels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Link, useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -21,6 +24,11 @@ type Screen = "home" | "level" | "summary" | "end";
 const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
 
 function Index() {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const [displayName, setDisplayName] = useState<string>("");
+  const [completedLevels, setCompletedLevels] = useState<Set<number>>(new Set());
+
   const [screen, setScreen] = useState<Screen>("home");
   const [levelIdx, setLevelIdx] = useState(0);
   const [qIdx, setQIdx] = useState(0);
@@ -30,13 +38,36 @@ function Index() {
   const [feedback, setFeedback] = useState<null | { kind: "correct" | "close" | "wrong"; msg: string; explain: string; gain: number }>(null);
   const [levelCorrect, setLevelCorrect] = useState(0);
 
+  // Load profile + progress when signed in
+  useEffect(() => {
+    if (!user) { setDisplayName(""); setCompletedLevels(new Set()); return; }
+    (async () => {
+      const [{ data: profile }, { data: progress }] = await Promise.all([
+        supabase.from("profiles").select("display_name").eq("user_id", user.id).maybeSingle(),
+        supabase.from("user_progress").select("level_id, score, money").eq("user_id", user.id),
+      ]);
+      setDisplayName(profile?.display_name ?? user.email?.split("@")[0] ?? "Traveler");
+      if (progress) {
+        setCompletedLevels(new Set(progress.map((p) => p.level_id)));
+        setScore(progress.reduce((s, p) => s + p.score, 0));
+        setMoney(progress.reduce((s, p) => s + p.money, 0));
+      }
+    })();
+  }, [user]);
+
   const level = LEVELS[levelIdx];
   const question = level?.questions[qIdx];
 
   const start = () => {
-    setScreen("level"); setLevelIdx(0); setQIdx(0); setScore(0); setMoney(0);
+    // Resume at first uncompleted level
+    const firstIncomplete = LEVELS.findIndex((l) => !completedLevels.has(l.id));
+    setScreen("level");
+    setLevelIdx(firstIncomplete === -1 ? 0 : firstIncomplete);
+    setQIdx(0);
     setInput(""); setFeedback(null); setLevelCorrect(0);
   };
+
+  const signOut = async () => { await supabase.auth.signOut(); };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,11 +86,24 @@ function Index() {
   const next = () => {
     setInput(""); setFeedback(null);
     if (qIdx < 2) { setQIdx(qIdx + 1); return; }
-    // end of level
-    if (levelCorrect + (feedback?.kind === "correct" ? 0 : 0) === 3 || levelCorrect === 3) {
-      // bonus already if 3 — but levelCorrect updated; check via state directly
-    }
+    // Save level progress to backend
+    void saveLevelProgress();
     setScreen("summary");
+  };
+
+  const saveLevelProgress = async () => {
+    if (!user) return;
+    const allRight = levelCorrect === 3;
+    const levelScore = levelCorrect * 10 + (allRight ? 20 : 0);
+    const levelMoney = levelCorrect * 5 + (allRight ? 10 : 0);
+    await supabase.from("user_progress").upsert({
+      user_id: user.id,
+      level_id: level.id,
+      correct_count: levelCorrect,
+      score: levelScore,
+      money: levelMoney,
+    }, { onConflict: "user_id,level_id" });
+    setCompletedLevels((s) => new Set(s).add(level.id));
   };
 
   const goNextLevel = () => {
@@ -71,11 +115,35 @@ function Index() {
     setLevelIdx(levelIdx + 1); setQIdx(0); setLevelCorrect(0); setScreen("level");
   };
 
+  if (authLoading) return <div className="min-h-screen flex items-center justify-center">🌍 Loading...</div>;
+
+  if (!user) {
+    return (
+      <div className="relative min-h-screen overflow-hidden">
+        <img src={heroImg} alt="World landmarks collage" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background/90" />
+        <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center">
+          <h1 className="text-6xl font-black tracking-tight drop-shadow-md md:text-8xl">🌍 WORLD QUEST</h1>
+          <p className="mt-4 max-w-xl text-lg text-foreground/80">Sign in to start your geography adventure.</p>
+          <Link to="/auth">
+            <Button className="mt-10 h-16 rounded-full px-12 text-2xl font-bold shadow-2xl hover:scale-105 transition">
+              ▶️ Sign in / Register
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (screen === "home") {
     return (
       <div className="relative min-h-screen overflow-hidden">
         <img src={heroImg} alt="World landmarks collage" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background/90" />
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-3 rounded-full bg-card/90 px-4 py-2 shadow">
+          <span className="text-sm font-bold">👋 {displayName}</span>
+          <button onClick={signOut} className="text-xs text-muted-foreground hover:text-foreground">Sign out</button>
+        </div>
         <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center">
           <div className="mb-4 flex flex-wrap justify-center gap-2 text-3xl">
             {FLAGS.map((f) => <span key={f} className="drop-shadow-lg">{f}</span>)}
@@ -86,11 +154,16 @@ function Index() {
           <p className="mt-4 max-w-xl text-lg text-foreground/80 md:text-xl">
             A geography adventure across the world's greatest landmarks.
           </p>
+          {completedLevels.size > 0 && (
+            <div className="mt-4 rounded-full bg-card/80 px-5 py-2 text-sm font-bold">
+              Progress: {completedLevels.size}/{LEVELS.length} stops · ⭐ {score} · 💸 {money}
+            </div>
+          )}
           <Button
             onClick={start}
             className="mt-10 h-16 rounded-full bg-primary px-12 text-2xl font-bold text-primary-foreground shadow-2xl transition hover:scale-105"
           >
-            ▶️ PLAY
+            {completedLevels.size > 0 && completedLevels.size < LEVELS.length ? "▶️ CONTINUE" : "▶️ PLAY"}
           </Button>
           <p className="mt-6 text-sm text-foreground/70">7 stops · 21 questions · 1 world</p>
         </div>
