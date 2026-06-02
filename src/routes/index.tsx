@@ -73,8 +73,37 @@ function Index() {
   const question = level?.questions[qIdx];
 
   const start = () => {
+    // If all levels already completed, restart the journey from scratch
+    if (completedLevels.size >= LEVELS.length) {
+      setLevelIdx(0);
+      setQIdx(0);
+      setLevelCorrect(0);
+      void savePlayerState({
+        current_level_idx: 0,
+        current_question_idx: 0,
+        level_correct: 0,
+      });
+    }
     setScreen("level");
     setInput(""); setFeedback(null);
+  };
+
+  const resetProgress = async () => {
+    if (!user) return;
+    if (!confirm("Сбросить весь прогресс и начать заново?")) return;
+    await supabase.from("user_progress").delete().eq("user_id", user.id);
+    await supabase.from("profiles").update({
+      current_level_idx: 0,
+      current_question_idx: 0,
+      level_correct: 0,
+      total_score: 0,
+      total_money: 0,
+    }).eq("user_id", user.id);
+    setCompletedLevels(new Set());
+    setLevelIdx(0); setQIdx(0); setLevelCorrect(0);
+    setScore(0); setMoney(0);
+    setInput(""); setFeedback(null);
+    setScreen("home");
   };
 
   type PlayerStatePatch = Partial<{
