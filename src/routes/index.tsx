@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,7 +25,6 @@ const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮
 
 function Index() {
   const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
   const [displayName, setDisplayName] = useState<string>("");
   const [completedLevels, setCompletedLevels] = useState<Set<number>>(new Set());
 
