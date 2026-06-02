@@ -262,6 +262,14 @@ function Index() {
           >
             {completedLevels.size > 0 && completedLevels.size < LEVELS.length ? "▶️ CONTINUE" : "▶️ PLAY"}
           </Button>
+          {completedLevels.size > 0 && (
+            <button
+              onClick={resetProgress}
+              className="mt-4 text-sm text-foreground/70 underline hover:text-foreground"
+            >
+              🔄 Начать заново
+            </button>
+          )}
           <p className="mt-6 text-sm text-foreground/70">7 stops · 21 questions · 1 world</p>
         </div>
       </div>
