@@ -16,38 +16,50 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          best_score: number
           created_at: string
           current_level_idx: number
           current_question_idx: number
           display_name: string | null
           id: string
+          last_login_at: string
           level_correct: number
+          total_correct: number
           total_money: number
           total_score: number
+          total_wrong: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          best_score?: number
           created_at?: string
           current_level_idx?: number
           current_question_idx?: number
           display_name?: string | null
           id?: string
+          last_login_at?: string
           level_correct?: number
+          total_correct?: number
           total_money?: number
           total_score?: number
+          total_wrong?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          best_score?: number
           created_at?: string
           current_level_idx?: number
           current_question_idx?: number
           display_name?: string | null
           id?: string
+          last_login_at?: string
           level_correct?: number
+          total_correct?: number
           total_money?: number
           total_score?: number
+          total_wrong?: number
           updated_at?: string
           user_id?: string
         }
