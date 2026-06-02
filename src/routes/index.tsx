@@ -27,6 +27,7 @@ function Index() {
   const { user, loading: authLoading } = useAuth();
   const [displayName, setDisplayName] = useState<string>("");
   const [completedLevels, setCompletedLevels] = useState<Set<number>>(new Set());
+  const [stats, setStats] = useState<{ total_correct: number; total_wrong: number; best_score: number; last_login_at: string | null; created_at: string | null }>({ total_correct: 0, total_wrong: 0, best_score: 0, last_login_at: null, created_at: null });
 
   const [screen, setScreen] = useState<Screen>("home");
   const [levelIdx, setLevelIdx] = useState(0);
@@ -42,7 +43,7 @@ function Index() {
     if (!user) { setDisplayName(""); setCompletedLevels(new Set()); return; }
     (async () => {
       const [{ data: profile }, { data: progress }] = await Promise.all([
-        supabase.from("profiles").select("display_name, current_level_idx, current_question_idx, total_score, total_money, level_correct").eq("user_id", user.id).maybeSingle(),
+        supabase.from("profiles").select("display_name, current_level_idx, current_question_idx, total_score, total_money, level_correct, total_correct, total_wrong, best_score, last_login_at, created_at").eq("user_id", user.id).maybeSingle(),
         supabase.from("user_progress").select("level_id, score, money").eq("user_id", user.id),
       ]);
       setDisplayName(profile?.display_name ?? user.email?.split("@")[0] ?? "Traveler");
@@ -52,10 +53,19 @@ function Index() {
         setLevelCorrect(profile.level_correct ?? 0);
         setScore(profile.total_score ?? 0);
         setMoney(profile.total_money ?? 0);
+        setStats({
+          total_correct: profile.total_correct ?? 0,
+          total_wrong: profile.total_wrong ?? 0,
+          best_score: profile.best_score ?? 0,
+          last_login_at: profile.last_login_at ?? null,
+          created_at: profile.created_at ?? null,
+        });
       }
       if (progress) {
         setCompletedLevels(new Set(progress.map((p) => p.level_id)));
       }
+      // Update last login timestamp
+      await supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("user_id", user.id);
     })();
   }, [user]);
 
@@ -73,6 +83,9 @@ function Index() {
     total_score: number;
     total_money: number;
     level_correct: number;
+    total_correct: number;
+    total_wrong: number;
+    best_score: number;
   }>;
   const savePlayerState = async (patch: PlayerStatePatch) => {
     if (!user) return;
@@ -88,18 +101,25 @@ function Index() {
     let gain = 0;
     let msg = "";
     let newLevelCorrect = levelCorrect;
-    if (res === "correct") { gain = 10; msg = "Correct! ✅"; newLevelCorrect = levelCorrect + 1; setLevelCorrect(newLevelCorrect); }
-    else if (res === "close") { gain = 5; msg = "So close! 🤏"; }
-    else { gain = 0; msg = "Not quite. ❌"; }
+    let newTotalCorrect = stats.total_correct;
+    let newTotalWrong = stats.total_wrong;
+    if (res === "correct") { gain = 10; msg = "Correct! ✅"; newLevelCorrect = levelCorrect + 1; setLevelCorrect(newLevelCorrect); newTotalCorrect += 1; }
+    else if (res === "close") { gain = 5; msg = "So close! 🤏"; newTotalCorrect += 1; }
+    else { gain = 0; msg = "Not quite. ❌"; newTotalWrong += 1; }
     const newScore = score + gain;
     const newMoney = money + Math.floor(gain / 2);
+    const newBest = Math.max(stats.best_score, newScore);
     setScore(newScore);
     setMoney(newMoney);
+    setStats((s) => ({ ...s, total_correct: newTotalCorrect, total_wrong: newTotalWrong, best_score: newBest }));
     setFeedback({ kind: res, msg, explain: question.explain, gain });
     void savePlayerState({
       total_score: newScore,
       total_money: newMoney,
       level_correct: newLevelCorrect,
+      total_correct: newTotalCorrect,
+      total_wrong: newTotalWrong,
+      best_score: newBest,
     });
   };
 
@@ -200,6 +220,13 @@ function Index() {
               Progress: {completedLevels.size}/{LEVELS.length} stops · ⭐ {score} · 💸 {money}
             </div>
           )}
+          <div className="mt-3 flex flex-wrap justify-center gap-2 text-xs">
+            <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">🏆 Best: {stats.best_score}</span>
+            <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">✅ {stats.total_correct}</span>
+            <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">❌ {stats.total_wrong}</span>
+            {stats.created_at && <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">📅 Joined {new Date(stats.created_at).toLocaleDateString()}</span>}
+            {stats.last_login_at && <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">🕒 Last login {new Date(stats.last_login_at).toLocaleDateString()}</span>}
+          </div>
           <Button
             onClick={start}
             className="mt-10 h-16 rounded-full bg-primary px-12 text-2xl font-bold text-primary-foreground shadow-2xl transition hover:scale-105"
