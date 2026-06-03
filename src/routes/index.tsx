@@ -227,7 +227,7 @@ function Index() {
         setQIdx(nq);
         setFlying(false);
         void savePlayerState({ current_question_idx: nq });
-      }, 1300);
+      }, 2600);
       return;
     }
     // Save level progress to backend
