@@ -28,6 +28,7 @@ export type Level = {
   city: string;
   country: string;
   monument: string;
+  flagCode: string;
   npc: string;
   avatar: string;
   intro: string;
