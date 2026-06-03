@@ -577,7 +577,7 @@ function Index() {
           <div className="overflow-hidden rounded-2xl shadow-xl">
             <img
               key={`img-${level.id}-${qIdx}`}
-              src={level.images[qIdx === 0 ? 0 : 1] ?? level.image}
+              src={level.images[qIdx === 1 ? 1 : 0] ?? level.image}
               alt={`${level.monument} ${qIdx + 1}`}
               loading={qIdx === 0 ? "eager" : "lazy"}
               className="h-44 w-full object-cover md:h-[300px] animate-pop-in"
