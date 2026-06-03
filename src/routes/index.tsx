@@ -350,11 +350,11 @@ function Index() {
   // level screen
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary/20 via-background to-accent/20">
-      <div className="mx-auto max-w-4xl px-4 py-6">
+      <div className="mx-auto max-w-6xl px-4 py-3">
         {/* HUD */}
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-full bg-card px-5 py-3 shadow">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-full bg-card px-4 py-2 shadow text-sm">
           <div className="font-bold">Level {level.id} / {LEVELS.length}</div>
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-3">
             <span>⭐ {score}</span>
             <span>💸 {money}</span>
             <span>{level.flag} {level.country}</span>
@@ -362,7 +362,7 @@ function Index() {
         </div>
 
         {/* Always-visible level progress dots */}
-        <div className="mb-4 flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-card/70 px-4 py-3 shadow-sm">
+        <div className="mb-3 flex flex-wrap items-center justify-center gap-1.5 rounded-2xl bg-card/70 px-3 py-2 shadow-sm">
           {LEVELS.map((l, i) => {
             const done = completedLevels.has(l.id);
             const current = i === levelIdx;
@@ -370,7 +370,7 @@ function Index() {
               <div
                 key={l.id}
                 title={`${l.country} — ${l.monument}`}
-                className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-lg transition ${
+                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-base transition ${
                   current ? "border-primary bg-primary/15 scale-110" :
                   done ? "border-accent bg-accent/20" : "border-muted bg-card opacity-60"
                 }`}
@@ -390,77 +390,77 @@ function Index() {
           </div>
         )}
 
-        {/* Image */}
-        <div className="overflow-hidden rounded-3xl shadow-xl">
-          <img src={level.image} alt={level.monument} className="h-72 w-full object-cover md:h-96" />
-        </div>
-
-        {/* NPC */}
-        <div className="mt-4 rounded-2xl border-l-4 border-primary bg-card p-4 shadow">
-          <div className="text-sm font-bold text-primary">{level.npc}</div>
-          <p className="text-sm">{level.intro}</p>
-        </div>
-
-        {/* Question */}
-        <div className="mt-4 rounded-3xl bg-card p-6 shadow-xl">
-          <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Question {qIdx + 1} of 3
+        {/* Two-column: image + question side-by-side on desktop */}
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="overflow-hidden rounded-2xl shadow-xl">
+            <img src={level.image} alt={level.monument} className="h-48 w-full object-cover md:h-[420px]" />
           </div>
-          <h3 className="mt-1 text-2xl font-black">{question.q}</h3>
 
-          <form onSubmit={submit} className="mt-4 flex gap-2">
+          <div className="rounded-2xl bg-card p-4 shadow-xl">
+            <div className="rounded-xl border-l-4 border-primary bg-accent/10 p-2">
+              <div className="text-xs font-bold text-primary">{level.npc}</div>
+              <p className="text-xs">{level.intro}</p>
+            </div>
+
+            <div className="mt-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Question {qIdx + 1} of 3
+            </div>
+            <h3 className="mt-1 text-xl font-black md:text-2xl">{question.q}</h3>
+
+            <form onSubmit={submit} className="mt-3 flex gap-2">
             <Input
               autoFocus
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="✍️ Напишите ваш ответ здесь..."
               disabled={!!feedback}
-              className="h-14 text-lg border-2 border-primary/40 focus-visible:border-primary"
+              className="h-12 text-base border-2 border-primary/40 focus-visible:border-primary"
             />
-            <Button type="submit" disabled={!!feedback || !input.trim()} className="h-14 px-6 text-lg">
+            <Button type="submit" disabled={!!feedback || !input.trim()} className="h-12 px-5">
               Submit
             </Button>
-          </form>
+            </form>
 
-          {/* Hint */}
-          <div className="mt-3">
+            {/* Hint */}
+            <div className="mt-2">
             {!showHint ? (
               <button
                 type="button"
                 onClick={() => setShowHint(true)}
-                className="text-sm font-semibold text-primary underline hover:opacity-80"
+                className="text-xs font-semibold text-primary underline hover:opacity-80"
               >
                 💡 Показать подсказку
               </button>
             ) : (
-              <div className="rounded-2xl border border-dashed border-primary/40 bg-accent/10 p-3 text-sm">
+              <div className="rounded-xl border border-dashed border-primary/40 bg-accent/10 p-2 text-xs">
                 <div className="font-bold text-primary">💡 Подсказка</div>
                 <div className="mt-1">Страна: <b>{level.country}</b> {level.flag} · Город: <b>{level.city}</b></div>
                 <div className="mt-1 font-mono tracking-widest">{hintFor(question.answers)}</div>
               </div>
             )}
-          </div>
+            </div>
 
-          {feedback && (
-            <div className={`mt-4 rounded-2xl p-4 ${
+            {feedback && (
+            <div className={`mt-3 rounded-xl p-3 ${
               feedback.kind === "correct" ? "bg-primary/15"
               : feedback.kind === "close" ? "bg-accent/30" : "bg-destructive/15"
             }`}>
-              <div className="text-lg font-bold">{feedback.msg}</div>
-              <div className="text-sm">{feedback.explain}</div>
+              <div className="text-base font-bold">{feedback.msg}</div>
+              <div className="text-xs">{feedback.explain}</div>
               {feedback.gain > 0 && (
-                <div className="mt-1 text-sm font-bold">
+                <div className="mt-1 text-xs font-bold">
                   Вы получили +{feedback.gain} очков ⭐ · +{Math.floor(feedback.gain / 2)} 💸
                 </div>
               )}
-              <div className="mt-2 text-xs text-muted-foreground">
+              <div className="mt-1 text-xs text-muted-foreground">
                 Всего правильных: <b>{stats.total_correct}</b> · Неправильных: <b>{stats.total_wrong}</b>
               </div>
-              <Button onClick={next} className="mt-3 rounded-full">
+              <Button onClick={next} className="mt-2 rounded-full" size="sm">
                 {qIdx < 2 ? "✈️ Следующий вопрос →" : "Посмотреть результаты →"}
               </Button>
             </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
