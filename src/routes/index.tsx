@@ -23,16 +23,18 @@ export const Route = createFileRoute("/")({
 type Screen = "home" | "level" | "summary" | "end";
 const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
 
-function hintFor(answers: string[]): { masked: string; letters: number; words: number } {
-  // Prefer Russian variant for hint
-  const ru = answers.find((x) => /[а-яё]/i.test(x));
-  const a = ru ?? answers[0] ?? "";
+function maskOne(a: string) {
   const words = a.split(" ").filter(Boolean);
   const masked = words
     .map((w) => w[0].toUpperCase() + "•".repeat(Math.max(0, w.length - 1)))
     .join(" ");
   const letters = words.reduce((n, w) => n + w.length, 0);
   return { masked, letters, words: words.length };
+}
+function hintFor(answers: string[]) {
+  const ru = answers.find((x) => /[а-яё]/i.test(x)) ?? "";
+  const en = answers.find((x) => /[a-z]/i.test(x) && !/[а-яё]/i.test(x)) ?? answers[0] ?? "";
+  return { ru: maskOne(ru), en: maskOne(en) };
 }
 
 function Index() {
