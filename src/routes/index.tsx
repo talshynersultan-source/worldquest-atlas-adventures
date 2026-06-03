@@ -362,8 +362,27 @@ function Index() {
 
   // level screen
   return (
-    <div className="min-h-screen bg-gradient-to-br from-secondary/20 via-background to-accent/20">
-      <div className="mx-auto max-w-6xl px-4 py-3">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20">
+      {/* Floating country symbols in the background */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        {Array.from({ length: 14 }).map((_, i) => {
+          const sym = level.symbols[i % level.symbols.length];
+          return (
+            <span
+              key={`${level.id}-${i}`}
+              className="absolute bottom-[-10vh] text-4xl md:text-5xl opacity-40 animate-float-up select-none"
+              style={{
+                left: `${(i * 7 + 3) % 95}%`,
+                animationDelay: `${(i * 1.1) % 14}s`,
+                animationDuration: `${10 + (i % 5) * 2}s`,
+              }}
+            >
+              {sym}
+            </span>
+          );
+        })}
+      </div>
+      <div className="relative z-10 mx-auto max-w-6xl px-4 py-3">
         {/* HUD */}
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-full bg-card px-4 py-2 shadow text-sm">
           <div className="font-bold">Level {level.id} / {LEVELS.length}</div>
