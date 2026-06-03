@@ -461,18 +461,18 @@ function Index() {
   // level screen
   return (
     <div className="relative min-h-fit overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20 pb-6">
-      {/* Floating country symbols in the background */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        {Array.from({ length: 14 }).map((_, i) => {
+      {/* Floating country symbols rising from the bottom of the screen */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 top-0 z-0 overflow-hidden">
+        {Array.from({ length: 18 }).map((_, i) => {
           const sym = level.symbols[i % level.symbols.length];
           return (
             <span
               key={`${level.id}-${i}`}
-              className="absolute bottom-[-10vh] text-4xl md:text-5xl opacity-40 animate-float-up select-none"
+              className="absolute bottom-[-8vh] text-4xl md:text-5xl opacity-50 animate-float-up select-none"
               style={{
-                left: `${(i * 7 + 3) % 95}%`,
-                animationDelay: `${(i * 1.1) % 14}s`,
-                animationDuration: `${10 + (i % 5) * 2}s`,
+                left: `${(i * 5.5 + 2) % 96}%`,
+                animationDelay: `${(i * 0.8) % 12}s`,
+                animationDuration: `${11 + (i % 5) * 2}s`,
               }}
             >
               {sym}
