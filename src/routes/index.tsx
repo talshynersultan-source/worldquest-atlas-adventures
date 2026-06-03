@@ -697,6 +697,14 @@ function Index() {
                       ✕
                     </button>
                   </div>
+                  {qIdx === 1 ? (
+                    <div className="flex flex-col items-center justify-center gap-2 py-2">
+                      <div className="text-[11px] font-semibold text-muted-foreground">🏳️ Флаг этой страны</div>
+                      <div className="text-7xl md:text-8xl animate-bob drop-shadow-xl">{level.flag}</div>
+                      <div className="text-muted-foreground">Угадайте страну по флагу.</div>
+                    </div>
+                  ) : (
+                  <>
                   {h.ru.letters > 0 && (
                     <div className="rounded-lg bg-card/60 p-2">
                       <div className="text-[11px] font-semibold text-muted-foreground">🇷🇺 На русском</div>
@@ -712,6 +720,8 @@ function Index() {
                     </div>
                   )}
                   <div className="text-muted-foreground">Можно писать на русском или английском.</div>
+                  </>
+                  )}
                 </div>
                 </>
               );
