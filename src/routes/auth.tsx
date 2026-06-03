@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,8 +20,21 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   useEffect(() => { if (user) navigate({ to: "/" }); }, [user, navigate]);
+
+  const signInGoogle = async () => {
+    setErr(null); setGoogleBusy(true);
+    try {
+      const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+      if (res.error) throw res.error;
+      if (res.redirected) return;
+      navigate({ to: "/" });
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Google sign-in failed");
+    } finally { setGoogleBusy(false); }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +80,12 @@ function AuthPage() {
             {busy ? "..." : mode === "signup" ? "Create account" : "Sign in"}
           </Button>
         </form>
+        <div className="my-4 flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="h-px flex-1 bg-border" /> или <div className="h-px flex-1 bg-border" />
+        </div>
+        <Button type="button" onClick={signInGoogle} disabled={googleBusy} variant="outline" className="h-12 w-full rounded-full text-base font-bold">
+          {googleBusy ? "..." : "🟢 Продолжить через Google"}
+        </Button>
         <button
           onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setErr(null); }}
           className="mt-4 w-full text-sm text-muted-foreground hover:text-foreground"
