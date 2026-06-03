@@ -157,3 +157,19 @@
     letter-spacing: -0.02em;
   }
 }
+
+@keyframes plane-fly {
+  0% { transform: translate(-30vw, 20vh) rotate(-10deg); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translate(120vw, -20vh) rotate(-10deg); opacity: 0; }
+}
+.animate-plane-fly {
+  animation: plane-fly 1.4s ease-in-out forwards;
+}
+@keyframes cloud-drift {
+  0% { transform: translateX(-10%); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateX(20%); opacity: 0; }
+}
+.animate-cloud-drift { animation: cloud-drift 1.4s ease-in-out forwards; }
