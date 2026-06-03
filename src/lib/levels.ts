@@ -40,7 +40,7 @@ export type Level = {
 
 export const LEVELS: Level[] = [
   {
-    id: 1, image: eiffel, images: [eiffel, paris2], flag: "🇫🇷", city: "Paris", country: "France", monument: "Eiffel Tower",
+    id: 1, image: eiffel, images: [eiffel, paris2], flag: "🇫🇷", flagCode: "fr", city: "Paris", country: "France", monument: "Eiffel Tower",
     npc: "Bonjour! I'm Amélie 🥖", avatar: npcAmelie,
     intro: "Welcome to the City of Light! Look up at this iron giant.",
     fact: "The Eiffel Tower was built in 1889 for the World's Fair and grows 6 inches taller in summer heat!",
@@ -53,7 +53,7 @@ export const LEVELS: Level[] = [
     ],
   },
   {
-    id: 2, image: bigben, images: [bigben, london2], flag: "🇬🇧", city: "London", country: "United Kingdom", monument: "Big Ben",
+    id: 2, image: bigben, images: [bigben, london2], flag: "🇬🇧", flagCode: "gb", city: "London", country: "United Kingdom", monument: "Big Ben",
     npc: "Cheerio! I'm Oliver 🎩", avatar: npcOliver,
     intro: "Mind the gap! This clock tower has been chiming since 1859.",
     fact: "Big Ben is actually the name of the great bell inside the tower — the tower is called Elizabeth Tower.",
@@ -66,7 +66,7 @@ export const LEVELS: Level[] = [
     ],
   },
   {
-    id: 3, image: greatwall, images: [greatwall, beijing2], flag: "🇨🇳", city: "Beijing", country: "China", monument: "Great Wall of China",
+    id: 3, image: greatwall, images: [greatwall, beijing2], flag: "🇨🇳", flagCode: "cn", city: "Beijing", country: "China", monument: "Great Wall of China",
     npc: "Nǐ hǎo! I'm Mei 🐉", avatar: npcMei,
     intro: "This stone serpent stretches across mountains for thousands of miles.",
     fact: "The Great Wall is over 21,000 km long — built across many dynasties to defend the empire.",
@@ -79,7 +79,7 @@ export const LEVELS: Level[] = [
     ],
   },
   {
-    id: 4, image: liberty, images: [liberty, newyork2], flag: "🇺🇸", city: "New York", country: "United States", monument: "Statue of Liberty",
+    id: 4, image: liberty, images: [liberty, newyork2], flag: "🇺🇸", flagCode: "us", city: "New York", country: "United States", monument: "Statue of Liberty",
     npc: "Howdy! I'm Jack 🗽", avatar: npcJack,
     intro: "She holds her torch high, welcoming travelers to a new world.",
     fact: "The Statue of Liberty was a gift from France to the United States in 1886.",
@@ -92,7 +92,7 @@ export const LEVELS: Level[] = [
     ],
   },
   {
-    id: 5, image: colosseum, images: [colosseum, rome2], flag: "🇮🇹", city: "Rome", country: "Italy", monument: "Colosseum",
+    id: 5, image: colosseum, images: [colosseum, rome2], flag: "🇮🇹", flagCode: "it", city: "Rome", country: "Italy", monument: "Colosseum",
     npc: "Ciao! I'm Marco 🍕", avatar: npcMarco,
     intro: "Step into the arena where gladiators once roared with the crowd.",
     fact: "The Colosseum could hold up to 80,000 spectators and is nearly 2,000 years old!",
@@ -105,7 +105,7 @@ export const LEVELS: Level[] = [
     ],
   },
   {
-    id: 6, image: burj, images: [burj, dubai2], flag: "🇦🇪", city: "Dubai", country: "United Arab Emirates", monument: "Burj Khalifa",
+    id: 6, image: burj, images: [burj, dubai2], flag: "🇦🇪", flagCode: "ae", city: "Dubai", country: "United Arab Emirates", monument: "Burj Khalifa",
     npc: "Marhaba! I'm Layla ✨", avatar: npcLayla,
     intro: "Tilt your head all the way back — this is the tallest building on Earth.",
     fact: "Burj Khalifa stands 828 meters tall — taller than two Eiffel Towers stacked!",
@@ -118,7 +118,7 @@ export const LEVELS: Level[] = [
     ],
   },
   {
-    id: 7, image: christ, images: [christ, rio2], flag: "🇧🇷", city: "Rio de Janeiro", country: "Brazil", monument: "Christ the Redeemer",
+    id: 7, image: christ, images: [christ, rio2], flag: "🇧🇷", flagCode: "br", city: "Rio de Janeiro", country: "Brazil", monument: "Christ the Redeemer",
     npc: "Olá! I'm Bruno 🎉", avatar: npcBruno,
     intro: "Final stop! He stands with open arms over the city of samba.",
     fact: "Christ the Redeemer is 30 m tall and was named one of the New Seven Wonders of the World.",
