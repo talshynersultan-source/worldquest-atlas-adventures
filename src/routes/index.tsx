@@ -575,24 +575,13 @@ function Index() {
         {/* Two-column: image + question side-by-side on desktop */}
         <div className="grid gap-3 md:grid-cols-2">
           <div className="overflow-hidden rounded-2xl shadow-xl">
-            {qIdx === 1 ? (
-              <div
-                key={`flag-${level.id}`}
-                className="flex h-44 w-full items-center justify-center bg-gradient-to-br from-accent/30 to-secondary/30 md:h-[300px] animate-pop-in"
-              >
-                <span className="text-[8rem] md:text-[14rem] drop-shadow-2xl animate-bob">
-                  {level.flag}
-                </span>
-              </div>
-            ) : (
-              <img
-                key={`img-${level.id}-${qIdx}`}
-                src={level.images[qIdx === 0 ? 0 : 1] ?? level.image}
-                alt={`${level.monument} ${qIdx + 1}`}
-                loading={qIdx === 0 ? "eager" : "lazy"}
-                className="h-44 w-full object-cover md:h-[300px] animate-pop-in"
-              />
-            )}
+            <img
+              key={`img-${level.id}-${qIdx}`}
+              src={level.images[qIdx === 0 ? 0 : 1] ?? level.image}
+              alt={`${level.monument} ${qIdx + 1}`}
+              loading={qIdx === 0 ? "eager" : "lazy"}
+              className="h-44 w-full object-cover md:h-[300px] animate-pop-in"
+            />
           </div>
 
           <div className="relative rounded-2xl bg-card p-4 shadow-xl">
