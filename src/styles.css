@@ -219,3 +219,47 @@
   100% { transform: translate(var(--bx,40px), var(--by,-40px)) scale(1.2) rotate(180deg); opacity: 0; }
 }
 .animate-burst { animation: burst 1.1s ease-out forwards; }
+
+/* Sky changes from day → sunset → night over the flight */
+@keyframes sky-cycle {
+  0%   { background: linear-gradient(to bottom, #87ceeb 0%, #e0f2fe 100%); }
+  35%  { background: linear-gradient(to bottom, #fb923c 0%, #fde68a 100%); }
+  70%  { background: linear-gradient(to bottom, #1e1b4b 0%, #312e81 100%); }
+  100% { background: linear-gradient(to bottom, #0b1026 0%, #1e1b4b 100%); }
+}
+.animate-sky-cycle { animation: sky-cycle 2.6s ease-in-out forwards; }
+
+@keyframes sun-set {
+  0%   { transform: translateY(0) scale(1); opacity: 1; }
+  45%  { transform: translateY(40px) scale(0.9); opacity: 0.9; }
+  60%  { transform: translateY(120px) scale(0.7); opacity: 0; }
+  100% { transform: translateY(160px); opacity: 0; }
+}
+.animate-sun-set { animation: sun-set 2.6s ease-in-out forwards; }
+
+@keyframes moon-rise {
+  0%, 45% { transform: translateY(120px) scale(0.7); opacity: 0; }
+  70%     { transform: translateY(20px) scale(0.95); opacity: 0.95; }
+  100%    { transform: translateY(0) scale(1); opacity: 1; }
+}
+.animate-moon-rise { animation: moon-rise 2.6s ease-in-out forwards; }
+
+@keyframes stars-fade {
+  0%, 55% { opacity: 0; transform: scale(0.6); }
+  75%     { opacity: 1; transform: scale(1.1); }
+  100%    { opacity: 0.9; transform: scale(1); }
+}
+.animate-stars-fade { animation: stars-fade 2.6s ease-in-out forwards; }
+
+/* Plane flies an arc across the screen following the dashed path */
+@keyframes plane-arc {
+  0%   { offset-distance: 0%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+.animate-plane-arc {
+  offset-path: path("M -50 400 Q 600 -100 1400 400");
+  offset-rotate: auto;
+  animation: plane-arc 2.6s ease-in-out forwards;
+}
