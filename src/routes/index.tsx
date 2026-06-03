@@ -366,7 +366,7 @@ function Index() {
 
   // level screen
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20">
+    <div className="relative min-h-fit overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20 pb-6">
       {/* Floating country symbols in the background */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         {Array.from({ length: 14 }).map((_, i) => {
