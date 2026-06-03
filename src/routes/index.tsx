@@ -340,7 +340,11 @@ function Index() {
           <div className="text-center text-5xl">{level.flag}</div>
           <h2 className="mt-2 text-center text-3xl font-black">{level.monument}</h2>
           <p className="text-center text-muted-foreground">{level.city}, {level.country}</p>
-          <div className="mt-6 rounded-2xl bg-accent/20 p-4">
+          <div className="relative mt-6 rounded-2xl bg-accent/20 p-4">
+            <span className="absolute -top-4 -left-3 text-4xl rotate-[-15deg] animate-bob">{level.symbols[0]}</span>
+            <span className="absolute -top-5 -right-2 text-4xl rotate-[12deg] animate-sparkle">✨</span>
+            <span className="absolute -bottom-4 -right-3 text-4xl rotate-[10deg] animate-bob">{level.symbols[1] ?? "🎉"}</span>
+            <span className="absolute -bottom-3 -left-2 text-3xl rotate-[-8deg] animate-sparkle">🌟</span>
             <div className="text-sm font-bold uppercase tracking-wide text-foreground/70">🎓 Fun Fact</div>
             <p className="mt-1">{level.fact}</p>
           </div>
