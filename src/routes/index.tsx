@@ -24,7 +24,9 @@ type Screen = "home" | "level" | "summary" | "end";
 const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
 
 function hintFor(answers: string[]): { masked: string; letters: number; words: number } {
-  const a = answers[0] ?? "";
+  // Prefer Russian variant for hint
+  const ru = answers.find((x) => /[а-яё]/i.test(x));
+  const a = ru ?? answers[0] ?? "";
   const words = a.split(" ").filter(Boolean);
   const masked = words
     .map((w) => w[0].toUpperCase() + "•".repeat(Math.max(0, w.length - 1)))
