@@ -442,8 +442,20 @@ function Index() {
               return (
                 <div className="rounded-xl border border-dashed border-primary/40 bg-accent/10 p-3 text-xs space-y-1.5">
                   <div className="font-bold text-primary text-sm">💡 Подсказка</div>
-                  <div>🔤 Букв в ответе: <b>{h.letters}</b> ({h.words === 1 ? "1 слово" : `${h.words} слова`})</div>
-                  <div>✏️ Первая буква: <span className="font-mono text-base tracking-widest text-primary font-bold">{h.masked}</span></div>
+                  {h.ru.letters > 0 && (
+                    <div className="rounded-lg bg-card/60 p-2">
+                      <div className="text-[11px] font-semibold text-muted-foreground">🇷🇺 На русском</div>
+                      <div>🔤 Букв: <b>{h.ru.letters}</b> ({h.ru.words === 1 ? "1 слово" : `${h.ru.words} слова`})</div>
+                      <div>✏️ <span className="font-mono text-base tracking-widest text-primary font-bold">{h.ru.masked}</span></div>
+                    </div>
+                  )}
+                  {h.en.letters > 0 && (
+                    <div className="rounded-lg bg-card/60 p-2">
+                      <div className="text-[11px] font-semibold text-muted-foreground">🇬🇧 In English</div>
+                      <div>🔤 Letters: <b>{h.en.letters}</b> ({h.en.words === 1 ? "1 word" : `${h.en.words} words`})</div>
+                      <div>✏️ <span className="font-mono text-base tracking-widest text-primary font-bold">{h.en.masked}</span></div>
+                    </div>
+                  )}
                   <div className="text-muted-foreground">Можно писать на русском или английском.</div>
                 </div>
               );
