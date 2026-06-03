@@ -178,7 +178,7 @@ function Index() {
     setInput(""); setFeedback(null); setShowHint(false);
     if (qIdx < 2) {
       const nq = qIdx + 1;
-      setTransitionKind("globe");
+      setTransitionKind("plane");
       setFlying(true);
       window.setTimeout(() => {
         setQIdx(nq);
@@ -222,7 +222,7 @@ function Index() {
       return;
     }
     const nl = levelIdx + 1;
-    setTransitionKind("plane");
+    setTransitionKind("globe");
     setFlying(true);
     setScreen("level");
     window.setTimeout(() => {
