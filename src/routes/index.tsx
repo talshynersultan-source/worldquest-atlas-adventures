@@ -23,16 +23,18 @@ export const Route = createFileRoute("/")({
 type Screen = "home" | "level" | "summary" | "end";
 const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
 
-function hintFor(answers: string[]): { masked: string; letters: number; words: number } {
-  // Prefer Russian variant for hint
-  const ru = answers.find((x) => /[а-яё]/i.test(x));
-  const a = ru ?? answers[0] ?? "";
+function maskOne(a: string) {
   const words = a.split(" ").filter(Boolean);
   const masked = words
     .map((w) => w[0].toUpperCase() + "•".repeat(Math.max(0, w.length - 1)))
     .join(" ");
   const letters = words.reduce((n, w) => n + w.length, 0);
   return { masked, letters, words: words.length };
+}
+function hintFor(answers: string[]) {
+  const ru = answers.find((x) => /[а-яё]/i.test(x)) ?? "";
+  const en = answers.find((x) => /[a-z]/i.test(x) && !/[а-яё]/i.test(x)) ?? answers[0] ?? "";
+  return { ru: maskOne(ru), en: maskOne(en) };
 }
 
 function Index() {
@@ -440,8 +442,20 @@ function Index() {
               return (
                 <div className="rounded-xl border border-dashed border-primary/40 bg-accent/10 p-3 text-xs space-y-1.5">
                   <div className="font-bold text-primary text-sm">💡 Подсказка</div>
-                  <div>🔤 Букв в ответе: <b>{h.letters}</b> ({h.words === 1 ? "1 слово" : `${h.words} слова`})</div>
-                  <div>✏️ Первая буква: <span className="font-mono text-base tracking-widest text-primary font-bold">{h.masked}</span></div>
+                  {h.ru.letters > 0 && (
+                    <div className="rounded-lg bg-card/60 p-2">
+                      <div className="text-[11px] font-semibold text-muted-foreground">🇷🇺 На русском</div>
+                      <div>🔤 Букв: <b>{h.ru.letters}</b> ({h.ru.words === 1 ? "1 слово" : `${h.ru.words} слова`})</div>
+                      <div>✏️ <span className="font-mono text-base tracking-widest text-primary font-bold">{h.ru.masked}</span></div>
+                    </div>
+                  )}
+                  {h.en.letters > 0 && (
+                    <div className="rounded-lg bg-card/60 p-2">
+                      <div className="text-[11px] font-semibold text-muted-foreground">🇬🇧 In English</div>
+                      <div>🔤 Letters: <b>{h.en.letters}</b> ({h.en.words === 1 ? "1 word" : `${h.en.words} words`})</div>
+                      <div>✏️ <span className="font-mono text-base tracking-widest text-primary font-bold">{h.en.masked}</span></div>
+                    </div>
+                  )}
                   <div className="text-muted-foreground">Можно писать на русском или английском.</div>
                 </div>
               );
