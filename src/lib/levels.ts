@@ -5,6 +5,13 @@ import liberty from "@/assets/liberty.jpg";
 import colosseum from "@/assets/colosseum.jpg";
 import burj from "@/assets/burj.jpg";
 import christ from "@/assets/christ.jpg";
+import npcAmelie from "@/assets/npc-amelie.png";
+import npcOliver from "@/assets/npc-oliver.png";
+import npcMei from "@/assets/npc-mei.png";
+import npcJack from "@/assets/npc-jack.png";
+import npcMarco from "@/assets/npc-marco.png";
+import npcLayla from "@/assets/npc-layla.png";
+import npcBruno from "@/assets/npc-bruno.png";
 
 export type Level = {
   id: number;
@@ -14,6 +21,7 @@ export type Level = {
   country: string;
   monument: string;
   npc: string;
+  avatar: string;
   intro: string;
   fact: string;
   vocab: string[];
@@ -23,7 +31,7 @@ export type Level = {
 export const LEVELS: Level[] = [
   {
     id: 1, image: eiffel, flag: "🇫🇷", city: "Paris", country: "France", monument: "Eiffel Tower",
-    npc: "Bonjour! I'm Amélie 🥖",
+    npc: "Bonjour! I'm Amélie 🥖", avatar: npcAmelie,
     intro: "Welcome to the City of Light! Look up at this iron giant.",
     fact: "The Eiffel Tower was built in 1889 for the World's Fair and grows 6 inches taller in summer heat!",
     vocab: ["Tour Eiffel", "Paris"],
@@ -35,7 +43,7 @@ export const LEVELS: Level[] = [
   },
   {
     id: 2, image: bigben, flag: "🇬🇧", city: "London", country: "United Kingdom", monument: "Big Ben",
-    npc: "Cheerio! I'm Oliver 🎩",
+    npc: "Cheerio! I'm Oliver 🎩", avatar: npcOliver,
     intro: "Mind the gap! This clock tower has been chiming since 1859.",
     fact: "Big Ben is actually the name of the great bell inside the tower — the tower is called Elizabeth Tower.",
     vocab: ["Clock tower", "London"],
@@ -47,7 +55,7 @@ export const LEVELS: Level[] = [
   },
   {
     id: 3, image: greatwall, flag: "🇨🇳", city: "Beijing", country: "China", monument: "Great Wall of China",
-    npc: "Nǐ hǎo! I'm Mei 🐉",
+    npc: "Nǐ hǎo! I'm Mei 🐉", avatar: npcMei,
     intro: "This stone serpent stretches across mountains for thousands of miles.",
     fact: "The Great Wall is over 21,000 km long — built across many dynasties to defend the empire.",
     vocab: ["Great Wall", "Beijing"],
@@ -59,7 +67,7 @@ export const LEVELS: Level[] = [
   },
   {
     id: 4, image: liberty, flag: "🇺🇸", city: "New York", country: "United States", monument: "Statue of Liberty",
-    npc: "Howdy! I'm Jack 🗽",
+    npc: "Howdy! I'm Jack 🗽", avatar: npcJack,
     intro: "She holds her torch high, welcoming travelers to a new world.",
     fact: "The Statue of Liberty was a gift from France to the United States in 1886.",
     vocab: ["Liberty", "New York"],
@@ -71,7 +79,7 @@ export const LEVELS: Level[] = [
   },
   {
     id: 5, image: colosseum, flag: "🇮🇹", city: "Rome", country: "Italy", monument: "Colosseum",
-    npc: "Ciao! I'm Marco 🍕",
+    npc: "Ciao! I'm Marco 🍕", avatar: npcMarco,
     intro: "Step into the arena where gladiators once roared with the crowd.",
     fact: "The Colosseum could hold up to 80,000 spectators and is nearly 2,000 years old!",
     vocab: ["Amphitheater", "Rome"],
@@ -83,7 +91,7 @@ export const LEVELS: Level[] = [
   },
   {
     id: 6, image: burj, flag: "🇦🇪", city: "Dubai", country: "United Arab Emirates", monument: "Burj Khalifa",
-    npc: "Marhaba! I'm Layla ✨",
+    npc: "Marhaba! I'm Layla ✨", avatar: npcLayla,
     intro: "Tilt your head all the way back — this is the tallest building on Earth.",
     fact: "Burj Khalifa stands 828 meters tall — taller than two Eiffel Towers stacked!",
     vocab: ["Skyscraper", "Dubai"],
@@ -95,7 +103,7 @@ export const LEVELS: Level[] = [
   },
   {
     id: 7, image: christ, flag: "🇧🇷", city: "Rio de Janeiro", country: "Brazil", monument: "Christ the Redeemer",
-    npc: "Olá! I'm Bruno 🎉",
+    npc: "Olá! I'm Bruno 🎉", avatar: npcBruno,
     intro: "Final stop! He stands with open arms over the city of samba.",
     fact: "Christ the Redeemer is 30 m tall and was named one of the New Seven Wonders of the World.",
     vocab: ["Statue", "Rio"],

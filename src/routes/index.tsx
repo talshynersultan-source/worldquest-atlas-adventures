@@ -411,7 +411,23 @@ function Index() {
             <div className="mt-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Question {qIdx + 1} of 3
             </div>
-            <h3 className="mt-1 text-xl font-black md:text-2xl">{question.q}</h3>
+            <div className="mt-1 flex items-start gap-3">
+              <img
+                src={level.avatar}
+                alt={level.npc}
+                loading="lazy"
+                width={72}
+                height={72}
+                className="h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-full border-2 border-primary bg-card object-cover shadow-md"
+              />
+              <div className="relative flex-1 rounded-2xl border-2 border-primary/30 bg-accent/15 p-3">
+                <div className="absolute -left-2 top-5 h-4 w-4 rotate-45 border-b-2 border-l-2 border-primary/30 bg-accent/15" />
+                <div className="text-[11px] font-bold uppercase tracking-wide text-primary">
+                  {level.flag} Спрашивает житель {level.city}
+                </div>
+                <h3 className="mt-1 text-lg font-black md:text-xl">{question.q}</h3>
+              </div>
+            </div>
 
             <form onSubmit={submit} className="mt-3 flex gap-2">
             <Input
