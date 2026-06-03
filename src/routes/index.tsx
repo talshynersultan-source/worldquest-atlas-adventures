@@ -421,7 +421,6 @@ function Index() {
                 <div className="absolute top-[20%] left-[15%] text-8xl opacity-70 animate-cloud-drift">☁️</div>
                 <div className="absolute top-[55%] left-[45%] text-7xl opacity-70 animate-cloud-drift">☁️</div>
                 <div className="absolute top-[40%] left-[70%] text-8xl opacity-60 animate-cloud-drift">☁️</div>
-                <div className="absolute bottom-12 left-0 right-0 text-center text-3xl md:text-4xl font-bold text-foreground/80">Летим к следующей стране...</div>
               </>
             ) : (
               <>
