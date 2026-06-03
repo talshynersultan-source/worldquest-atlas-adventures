@@ -438,8 +438,6 @@ function Index() {
               return (
                 <div className="rounded-xl border border-dashed border-primary/40 bg-accent/10 p-3 text-xs space-y-1.5">
                   <div className="font-bold text-primary text-sm">💡 Подсказка</div>
-                  <div>🌍 Страна: <b>{level.country}</b> {level.flag}</div>
-                  <div>🏙️ Город: <b>{level.city}</b></div>
                   <div>🔤 Букв в ответе: <b>{h.letters}</b> ({h.words === 1 ? "1 слово" : `${h.words} слова`})</div>
                   <div>✏️ Первая буква: <span className="font-mono text-base tracking-widest text-primary font-bold">{h.masked}</span></div>
                   <div className="text-muted-foreground">Можно писать на русском или английском.</div>
