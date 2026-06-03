@@ -432,7 +432,6 @@ function Index() {
                 <div className="absolute top-[28%] right-[14%] text-5xl animate-sparkle">⭐</div>
                 <div className="absolute bottom-[22%] left-[20%] text-5xl animate-sparkle">💫</div>
                 <div className="absolute bottom-[28%] right-[18%] text-6xl animate-sparkle">✨</div>
-                <div className="absolute bottom-12 left-0 right-0 text-center text-3xl md:text-4xl font-bold text-foreground/80">Крутим глобус... следующий вопрос!</div>
               </>
             )}
           </div>
