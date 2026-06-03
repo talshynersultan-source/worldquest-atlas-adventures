@@ -361,6 +361,35 @@ function Index() {
           </div>
         </div>
 
+        {/* Always-visible level progress dots */}
+        <div className="mb-4 flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-card/70 px-4 py-3 shadow-sm">
+          {LEVELS.map((l, i) => {
+            const done = completedLevels.has(l.id);
+            const current = i === levelIdx;
+            return (
+              <div
+                key={l.id}
+                title={`${l.country} — ${l.monument}`}
+                className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-lg transition ${
+                  current ? "border-primary bg-primary/15 scale-110" :
+                  done ? "border-accent bg-accent/20" : "border-muted bg-card opacity-60"
+                }`}
+              >
+                {done ? "✅" : l.flag}
+              </div>
+            );
+          })}
+        </div>
+
+        {flying && (
+          <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden bg-gradient-to-b from-sky-200/80 to-sky-50/60">
+            <div className="absolute top-1/2 left-0 text-7xl animate-plane-fly">✈️</div>
+            <div className="absolute top-[30%] left-[20%] text-6xl opacity-70 animate-cloud-drift">☁️</div>
+            <div className="absolute top-[60%] left-[50%] text-5xl opacity-70 animate-cloud-drift">☁️</div>
+            <div className="absolute bottom-10 left-0 right-0 text-center text-2xl font-bold text-foreground/80">Летим к следующему вопросу...</div>
+          </div>
+        )}
+
         {/* Image */}
         <div className="overflow-hidden rounded-3xl shadow-xl">
           <img src={level.image} alt={level.monument} className="h-72 w-full object-cover md:h-96" />
@@ -384,14 +413,33 @@ function Index() {
               autoFocus
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your answer..."
+              placeholder="✍️ Напишите ваш ответ здесь..."
               disabled={!!feedback}
-              className="h-12 text-lg"
+              className="h-14 text-lg border-2 border-primary/40 focus-visible:border-primary"
             />
-            <Button type="submit" disabled={!!feedback || !input.trim()} className="h-12 px-6 text-lg">
+            <Button type="submit" disabled={!!feedback || !input.trim()} className="h-14 px-6 text-lg">
               Submit
             </Button>
           </form>
+
+          {/* Hint */}
+          <div className="mt-3">
+            {!showHint ? (
+              <button
+                type="button"
+                onClick={() => setShowHint(true)}
+                className="text-sm font-semibold text-primary underline hover:opacity-80"
+              >
+                💡 Показать подсказку
+              </button>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-primary/40 bg-accent/10 p-3 text-sm">
+                <div className="font-bold text-primary">💡 Подсказка</div>
+                <div className="mt-1">Страна: <b>{level.country}</b> {level.flag} · Город: <b>{level.city}</b></div>
+                <div className="mt-1 font-mono tracking-widest">{hintFor(question.answers)}</div>
+              </div>
+            )}
+          </div>
 
           {feedback && (
             <div className={`mt-4 rounded-2xl p-4 ${
@@ -402,11 +450,14 @@ function Index() {
               <div className="text-sm">{feedback.explain}</div>
               {feedback.gain > 0 && (
                 <div className="mt-1 text-sm font-bold">
-                  You earned +{feedback.gain} points ⭐ · +{Math.floor(feedback.gain / 2)} money 💸
+                  Вы получили +{feedback.gain} очков ⭐ · +{Math.floor(feedback.gain / 2)} 💸
                 </div>
               )}
+              <div className="mt-2 text-xs text-muted-foreground">
+                Всего правильных: <b>{stats.total_correct}</b> · Неправильных: <b>{stats.total_wrong}</b>
+              </div>
               <Button onClick={next} className="mt-3 rounded-full">
-                {qIdx < 2 ? "Next question →" : "See results →"}
+                {qIdx < 2 ? "✈️ Следующий вопрос →" : "Посмотреть результаты →"}
               </Button>
             </div>
           )}
