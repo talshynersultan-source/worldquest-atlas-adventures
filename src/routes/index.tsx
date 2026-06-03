@@ -23,6 +23,49 @@ export const Route = createFileRoute("/")({
 type Screen = "home" | "level" | "summary" | "end";
 const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
 
+function PlaneSVG() {
+  return (
+    <svg width="170" height="80" viewBox="0 0 170 80" className="drop-shadow-2xl">
+      <defs>
+        <linearGradient id="fuselage" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="55%" stopColor="#e6ecf3" />
+          <stop offset="100%" stopColor="#9aa6b2" />
+        </linearGradient>
+        <linearGradient id="wing" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#cfd6de" />
+          <stop offset="100%" stopColor="#6c7682" />
+        </linearGradient>
+        <linearGradient id="stripe" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stopColor="#0ea5e9" />
+          <stop offset="100%" stopColor="#2563eb" />
+        </linearGradient>
+      </defs>
+      {/* Contrail */}
+      <path d="M 10 44 Q 30 40 55 44" stroke="white" strokeOpacity="0.7" strokeWidth="5" strokeLinecap="round" fill="none" />
+      {/* Tail fin */}
+      <path d="M 50 44 L 60 22 L 70 44 Z" fill="url(#wing)" />
+      {/* Main wing (back) */}
+      <path d="M 70 46 L 95 60 L 130 60 L 110 46 Z" fill="url(#wing)" />
+      {/* Fuselage */}
+      <path d="M 55 44 Q 80 30 140 38 Q 158 40 162 44 Q 158 48 140 50 Q 80 58 55 44 Z" fill="url(#fuselage)" stroke="#5b6573" strokeWidth="0.6" />
+      {/* Cheat-line stripe */}
+      <path d="M 60 44 Q 100 41 158 44" stroke="url(#stripe)" strokeWidth="1.6" fill="none" />
+      {/* Cockpit windows */}
+      <path d="M 148 41 Q 156 41 159 43 L 156 45 Q 152 44 148 44 Z" fill="#1e293b" />
+      {/* Passenger windows */}
+      {Array.from({ length: 9 }).map((_, i) => (
+        <circle key={i} cx={75 + i * 8} cy={43} r={1.1} fill="#1e293b" />
+      ))}
+      {/* Front wing (over) */}
+      <path d="M 78 44 L 70 70 L 100 70 L 100 50 Z" fill="url(#wing)" opacity="0.95" />
+      {/* Engines */}
+      <ellipse cx="98" cy="58" rx="7" ry="3" fill="#3b4452" />
+      <ellipse cx="100" cy="58" rx="2" ry="1.5" fill="#0f172a" />
+    </svg>
+  );
+}
+
 function maskOne(a: string) {
   const words = a.split(" ").filter(Boolean);
   const masked = words
