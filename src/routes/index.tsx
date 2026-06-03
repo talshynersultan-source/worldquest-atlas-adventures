@@ -52,6 +52,8 @@ function Index() {
   const [feedback, setFeedback] = useState<null | { kind: "correct" | "close" | "wrong"; msg: string; explain: string; gain: number }>(null);
   const [levelCorrect, setLevelCorrect] = useState(0);
   const [flying, setFlying] = useState(false);
+  const [transitionKind, setTransitionKind] = useState<"plane" | "globe">("plane");
+  const [confetti, setConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
   // Load profile + progress when signed in
@@ -158,6 +160,10 @@ function Index() {
     setMoney(newMoney);
     setStats((s) => ({ ...s, total_correct: newTotalCorrect, total_wrong: newTotalWrong, best_score: newBest }));
     setFeedback({ kind: res, msg, explain: question.explain, gain });
+    if (res === "correct") {
+      setConfetti(true);
+      window.setTimeout(() => setConfetti(false), 1400);
+    }
     void savePlayerState({
       total_score: newScore,
       total_money: newMoney,
@@ -172,12 +178,13 @@ function Index() {
     setInput(""); setFeedback(null); setShowHint(false);
     if (qIdx < 2) {
       const nq = qIdx + 1;
+      setTransitionKind("globe");
       setFlying(true);
       window.setTimeout(() => {
         setQIdx(nq);
         setFlying(false);
         void savePlayerState({ current_question_idx: nq });
-      }, 1400);
+      }, 1300);
       return;
     }
     // Save level progress to backend
@@ -215,6 +222,7 @@ function Index() {
       return;
     }
     const nl = levelIdx + 1;
+    setTransitionKind("plane");
     setFlying(true);
     setScreen("level");
     window.setTimeout(() => {
