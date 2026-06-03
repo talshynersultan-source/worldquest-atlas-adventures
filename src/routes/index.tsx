@@ -271,10 +271,8 @@ function Index() {
           )}
           <div className="mt-3 flex flex-wrap justify-center gap-2 text-xs">
             <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">🏆 Best: {stats.best_score}</span>
-            <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">✅ {stats.total_correct}</span>
-            <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">❌ {stats.total_wrong}</span>
-            {stats.created_at && <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">📅 Joined {new Date(stats.created_at).toLocaleDateString()}</span>}
-            {stats.last_login_at && <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">🕒 Last login {new Date(stats.last_login_at).toLocaleDateString()}</span>}
+            <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">✅ Правильных ответов: {stats.total_correct}</span>
+            <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">❌ Неправильных ответов: {stats.total_wrong}</span>
           </div>
           <Button
             onClick={start}
