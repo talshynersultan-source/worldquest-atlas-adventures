@@ -25,6 +25,7 @@ export type Level = {
   intro: string;
   fact: string;
   vocab: string[];
+  symbols: string[];
   questions: { q: string; answers: string[]; explain: string }[];
 };
 
@@ -35,6 +36,7 @@ export const LEVELS: Level[] = [
     intro: "Welcome to the City of Light! Look up at this iron giant.",
     fact: "The Eiffel Tower was built in 1889 for the World's Fair and grows 6 inches taller in summer heat!",
     vocab: ["Tour Eiffel", "Paris"],
+    symbols: ["🥖", "🥐", "🧀", "🍷", "🗼", "🎨"],
     questions: [
       { q: "What monument is shown in this image?", answers: ["eiffel tower", "eiffel", "tour eiffel", "эйфелева башня", "эйфелева", "эйфель"], explain: "It's the iconic Eiffel Tower." },
       { q: "Which country is it located in?", answers: ["france", "франция"], explain: "It stands in France." },
@@ -47,6 +49,7 @@ export const LEVELS: Level[] = [
     intro: "Mind the gap! This clock tower has been chiming since 1859.",
     fact: "Big Ben is actually the name of the great bell inside the tower — the tower is called Elizabeth Tower.",
     vocab: ["Clock tower", "London"],
+    symbols: ["☂️", "🎩", "🚌", "☕", "🇬🇧", "🕰️"],
     questions: [
       { q: "What monument is shown in this image?", answers: ["big ben", "elizabeth tower", "биг бен", "бигбен"], explain: "That's Big Ben!" },
       { q: "Which country is it in?", answers: ["uk", "united kingdom", "england", "britain", "great britain", "великобритания", "англия", "британия"], explain: "It's in the United Kingdom." },
@@ -59,6 +62,7 @@ export const LEVELS: Level[] = [
     intro: "This stone serpent stretches across mountains for thousands of miles.",
     fact: "The Great Wall is over 21,000 km long — built across many dynasties to defend the empire.",
     vocab: ["Great Wall", "Beijing"],
+    symbols: ["🐉", "🏮", "🥟", "🍜", "🐼", "🎋"],
     questions: [
       { q: "What monument is shown?", answers: ["great wall", "great wall of china", "the great wall", "великая китайская стена", "китайская стена", "стена"], explain: "The Great Wall of China." },
       { q: "Which country is it in?", answers: ["china", "китай"], explain: "It winds through northern China." },
@@ -71,6 +75,7 @@ export const LEVELS: Level[] = [
     intro: "She holds her torch high, welcoming travelers to a new world.",
     fact: "The Statue of Liberty was a gift from France to the United States in 1886.",
     vocab: ["Liberty", "New York"],
+    symbols: ["🗽", "🍔", "🌭", "🚕", "🗽", "🎬"],
     questions: [
       { q: "What monument is shown?", answers: ["statue of liberty", "liberty", "статуя свободы", "свобода"], explain: "The Statue of Liberty." },
       { q: "Which country is it in?", answers: ["usa", "us", "united states", "america", "united states of america", "сша", "америка", "соединенные штаты"], explain: "It stands in the USA." },
@@ -83,6 +88,7 @@ export const LEVELS: Level[] = [
     intro: "Step into the arena where gladiators once roared with the crowd.",
     fact: "The Colosseum could hold up to 80,000 spectators and is nearly 2,000 years old!",
     vocab: ["Amphitheater", "Rome"],
+    symbols: ["🍕", "🍝", "🛵", "🏛️", "⚔️", "🍦"],
     questions: [
       { q: "What monument is shown?", answers: ["colosseum", "coliseum", "колизей"], explain: "The mighty Colosseum." },
       { q: "Which country is it in?", answers: ["italy", "италия"], explain: "It's in Italy." },
@@ -95,6 +101,7 @@ export const LEVELS: Level[] = [
     intro: "Tilt your head all the way back — this is the tallest building on Earth.",
     fact: "Burj Khalifa stands 828 meters tall — taller than two Eiffel Towers stacked!",
     vocab: ["Skyscraper", "Dubai"],
+    symbols: ["🐪", "🕌", "✨", "🌴", "🏜️", "💎"],
     questions: [
       { q: "What monument is shown?", answers: ["burj khalifa", "burj", "бурдж халифа", "бурж халифа", "бурдж"], explain: "Burj Khalifa, the world's tallest." },
       { q: "Which country is it in?", answers: ["uae", "united arab emirates", "emirates", "оаэ", "эмираты", "объединенные арабские эмираты"], explain: "It's in the UAE." },
@@ -107,6 +114,7 @@ export const LEVELS: Level[] = [
     intro: "Final stop! He stands with open arms over the city of samba.",
     fact: "Christ the Redeemer is 30 m tall and was named one of the New Seven Wonders of the World.",
     vocab: ["Statue", "Rio"],
+    symbols: ["⚽", "🎭", "🥁", "🌴", "🦜", "🏖️"],
     questions: [
       { q: "What monument is shown?", answers: ["christ the redeemer", "cristo redentor", "redeemer", "christ", "статуя христа", "христос искупитель", "христос"], explain: "Christ the Redeemer." },
       { q: "Which country is it in?", answers: ["brazil", "brasil", "бразилия"], explain: "It's in Brazil." },
