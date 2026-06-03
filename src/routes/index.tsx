@@ -23,6 +23,49 @@ export const Route = createFileRoute("/")({
 type Screen = "home" | "level" | "summary" | "end";
 const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
 
+function PlaneSVG() {
+  return (
+    <svg width="170" height="80" viewBox="0 0 170 80" className="drop-shadow-2xl">
+      <defs>
+        <linearGradient id="fuselage" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="55%" stopColor="#e6ecf3" />
+          <stop offset="100%" stopColor="#9aa6b2" />
+        </linearGradient>
+        <linearGradient id="wing" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#cfd6de" />
+          <stop offset="100%" stopColor="#6c7682" />
+        </linearGradient>
+        <linearGradient id="stripe" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stopColor="#0ea5e9" />
+          <stop offset="100%" stopColor="#2563eb" />
+        </linearGradient>
+      </defs>
+      {/* Contrail */}
+      <path d="M 10 44 Q 30 40 55 44" stroke="white" strokeOpacity="0.7" strokeWidth="5" strokeLinecap="round" fill="none" />
+      {/* Tail fin */}
+      <path d="M 50 44 L 60 22 L 70 44 Z" fill="url(#wing)" />
+      {/* Main wing (back) */}
+      <path d="M 70 46 L 95 60 L 130 60 L 110 46 Z" fill="url(#wing)" />
+      {/* Fuselage */}
+      <path d="M 55 44 Q 80 30 140 38 Q 158 40 162 44 Q 158 48 140 50 Q 80 58 55 44 Z" fill="url(#fuselage)" stroke="#5b6573" strokeWidth="0.6" />
+      {/* Cheat-line stripe */}
+      <path d="M 60 44 Q 100 41 158 44" stroke="url(#stripe)" strokeWidth="1.6" fill="none" />
+      {/* Cockpit windows */}
+      <path d="M 148 41 Q 156 41 159 43 L 156 45 Q 152 44 148 44 Z" fill="#1e293b" />
+      {/* Passenger windows */}
+      {Array.from({ length: 9 }).map((_, i) => (
+        <circle key={i} cx={75 + i * 8} cy={43} r={1.1} fill="#1e293b" />
+      ))}
+      {/* Front wing (over) */}
+      <path d="M 78 44 L 70 70 L 100 70 L 100 50 Z" fill="url(#wing)" opacity="0.95" />
+      {/* Engines */}
+      <ellipse cx="98" cy="58" rx="7" ry="3" fill="#3b4452" />
+      <ellipse cx="100" cy="58" rx="2" ry="1.5" fill="#0f172a" />
+    </svg>
+  );
+}
+
 function maskOne(a: string) {
   const words = a.split(" ").filter(Boolean);
   const masked = words
@@ -184,7 +227,7 @@ function Index() {
         setQIdx(nq);
         setFlying(false);
         void savePlayerState({ current_question_idx: nq });
-      }, 1300);
+      }, 2600);
       return;
     }
     // Save level progress to backend
@@ -366,7 +409,7 @@ function Index() {
 
   // level screen
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20">
+    <div className="relative min-h-fit overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20 pb-6">
       {/* Floating country symbols in the background */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         {Array.from({ length: 14 }).map((_, i) => {
@@ -418,17 +461,41 @@ function Index() {
         </div>
 
         {flying && (
-          <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden bg-gradient-to-b from-sky-200/90 to-sky-50/70">
+          <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
             {transitionKind === "plane" ? (
-              <>
-                <div className="absolute top-1/2 left-0 text-[12rem] md:text-[16rem] animate-plane-fly drop-shadow-2xl">✈️</div>
-                <div className="absolute top-[20%] left-[15%] text-8xl opacity-70 animate-cloud-drift">☁️</div>
-                <div className="absolute top-[55%] left-[45%] text-7xl opacity-70 animate-cloud-drift">☁️</div>
-                <div className="absolute top-[40%] left-[70%] text-8xl opacity-60 animate-cloud-drift">☁️</div>
-              </>
+              <div className="absolute inset-0 animate-sky-cycle">
+                {/* Sun → Moon swap */}
+                <div className="absolute top-[12%] right-[12%] text-7xl animate-sun-set drop-shadow-xl">☀️</div>
+                <div className="absolute top-[12%] right-[12%] text-7xl animate-moon-rise drop-shadow-xl">🌙</div>
+                {/* Stars (visible at night) */}
+                <div className="absolute top-[18%] left-[20%] text-2xl animate-stars-fade">⭐</div>
+                <div className="absolute top-[28%] left-[40%] text-xl animate-stars-fade">✨</div>
+                <div className="absolute top-[14%] left-[65%] text-2xl animate-stars-fade">⭐</div>
+                <div className="absolute top-[32%] left-[78%] text-lg animate-stars-fade">✨</div>
+                {/* Clouds */}
+                <div className="absolute top-[22%] left-[12%] text-7xl opacity-80 animate-cloud-drift">☁️</div>
+                <div className="absolute top-[58%] left-[40%] text-6xl opacity-70 animate-cloud-drift">☁️</div>
+                <div className="absolute top-[42%] left-[70%] text-7xl opacity-70 animate-cloud-drift">☁️</div>
+                {/* Dashed flight path arc */}
+                <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 60" preserveAspectRatio="none">
+                  <path
+                    d="M -5 50 Q 50 -10 105 50"
+                    fill="none"
+                    stroke="white"
+                    strokeOpacity="0.85"
+                    strokeWidth="0.5"
+                    strokeDasharray="1.5 1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                {/* Realistic plane SVG flying the arc */}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 animate-plane-arc">
+                  <PlaneSVG />
+                </div>
+              </div>
             ) : (
               <>
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-sky-200/90 to-sky-50/70">
                   <div className="text-[10rem] md:text-[14rem] animate-globe-spin drop-shadow-2xl">🌍</div>
                 </div>
                 <div className="absolute top-[18%] left-[12%] text-6xl animate-sparkle">✨</div>
@@ -456,8 +523,17 @@ function Index() {
 
         {/* Two-column: image + question side-by-side on desktop */}
         <div className="grid gap-3 md:grid-cols-2">
-          <div className="overflow-hidden rounded-2xl shadow-xl">
-            <img src={level.image} alt={level.monument} className="h-44 w-full object-cover md:h-[300px]" />
+          <div className="grid grid-cols-2 gap-2">
+            {level.images.map((src, i) => (
+              <div key={i} className="overflow-hidden rounded-2xl shadow-xl">
+                <img
+                  src={src}
+                  alt={`${level.monument} ${i + 1}`}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  className="h-44 w-full object-cover md:h-[300px] hover:scale-105 transition"
+                />
+              </div>
+            ))}
           </div>
 
           <div className="relative rounded-2xl bg-card p-4 shadow-xl">
@@ -483,7 +559,8 @@ function Index() {
                 <div className="text-[11px] font-bold uppercase tracking-wide text-primary">
                   {level.flag} Спрашивает житель {level.city}
                 </div>
-                <h3 className="mt-1 text-lg font-black md:text-xl">{question.q}</h3>
+                <h3 className="mt-1 text-lg font-black md:text-xl">🇷🇺 {question.qRu}</h3>
+                <h4 className="mt-0.5 text-sm font-semibold text-muted-foreground md:text-base">🇬🇧 {question.q}</h4>
               </div>
             </div>
 
