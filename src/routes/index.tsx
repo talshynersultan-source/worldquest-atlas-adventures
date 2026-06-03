@@ -418,17 +418,41 @@ function Index() {
         </div>
 
         {flying && (
-          <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden bg-gradient-to-b from-sky-200/90 to-sky-50/70">
+          <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
             {transitionKind === "plane" ? (
-              <>
-                <div className="absolute top-1/2 left-0 text-[12rem] md:text-[16rem] animate-plane-fly drop-shadow-2xl">✈️</div>
-                <div className="absolute top-[20%] left-[15%] text-8xl opacity-70 animate-cloud-drift">☁️</div>
-                <div className="absolute top-[55%] left-[45%] text-7xl opacity-70 animate-cloud-drift">☁️</div>
-                <div className="absolute top-[40%] left-[70%] text-8xl opacity-60 animate-cloud-drift">☁️</div>
-              </>
+              <div className="absolute inset-0 animate-sky-cycle">
+                {/* Sun → Moon swap */}
+                <div className="absolute top-[12%] right-[12%] text-7xl animate-sun-set drop-shadow-xl">☀️</div>
+                <div className="absolute top-[12%] right-[12%] text-7xl animate-moon-rise drop-shadow-xl">🌙</div>
+                {/* Stars (visible at night) */}
+                <div className="absolute top-[18%] left-[20%] text-2xl animate-stars-fade">⭐</div>
+                <div className="absolute top-[28%] left-[40%] text-xl animate-stars-fade">✨</div>
+                <div className="absolute top-[14%] left-[65%] text-2xl animate-stars-fade">⭐</div>
+                <div className="absolute top-[32%] left-[78%] text-lg animate-stars-fade">✨</div>
+                {/* Clouds */}
+                <div className="absolute top-[22%] left-[12%] text-7xl opacity-80 animate-cloud-drift">☁️</div>
+                <div className="absolute top-[58%] left-[40%] text-6xl opacity-70 animate-cloud-drift">☁️</div>
+                <div className="absolute top-[42%] left-[70%] text-7xl opacity-70 animate-cloud-drift">☁️</div>
+                {/* Dashed flight path arc */}
+                <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 60" preserveAspectRatio="none">
+                  <path
+                    d="M -5 50 Q 50 -10 105 50"
+                    fill="none"
+                    stroke="white"
+                    strokeOpacity="0.85"
+                    strokeWidth="0.5"
+                    strokeDasharray="1.5 1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                {/* Realistic plane SVG flying the arc */}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 animate-plane-arc">
+                  <PlaneSVG />
+                </div>
+              </div>
             ) : (
               <>
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-sky-200/90 to-sky-50/70">
                   <div className="text-[10rem] md:text-[14rem] animate-globe-spin drop-shadow-2xl">🌍</div>
                 </div>
                 <div className="absolute top-[18%] left-[12%] text-6xl animate-sparkle">✨</div>
