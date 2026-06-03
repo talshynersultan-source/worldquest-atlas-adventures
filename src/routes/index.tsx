@@ -23,6 +23,15 @@ export const Route = createFileRoute("/")({
 type Screen = "home" | "level" | "summary" | "end";
 const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
 
+function hintFor(answers: string[]): string {
+  const a = answers[0] ?? "";
+  return a
+    .split(" ")
+    .map((w) => (w.length > 0 ? w[0].toUpperCase() + " " + "_ ".repeat(Math.max(0, w.length - 1)).trim() : ""))
+    .join("   ")
+    .trim();
+}
+
 function Index() {
   const { user, loading: authLoading } = useAuth();
   const [displayName, setDisplayName] = useState<string>("");
@@ -37,6 +46,8 @@ function Index() {
   const [money, setMoney] = useState(0);
   const [feedback, setFeedback] = useState<null | { kind: "correct" | "close" | "wrong"; msg: string; explain: string; gain: number }>(null);
   const [levelCorrect, setLevelCorrect] = useState(0);
+  const [flying, setFlying] = useState(false);
+  const [showHint, setShowHint] = useState(false);
 
   // Load profile + progress when signed in
   useEffect(() => {
@@ -153,11 +164,15 @@ function Index() {
   };
 
   const next = () => {
-    setInput(""); setFeedback(null);
+    setInput(""); setFeedback(null); setShowHint(false);
     if (qIdx < 2) {
       const nq = qIdx + 1;
-      setQIdx(nq);
-      void savePlayerState({ current_question_idx: nq });
+      setFlying(true);
+      window.setTimeout(() => {
+        setQIdx(nq);
+        setFlying(false);
+        void savePlayerState({ current_question_idx: nq });
+      }, 1400);
       return;
     }
     // Save level progress to backend
@@ -195,7 +210,12 @@ function Index() {
       return;
     }
     const nl = levelIdx + 1;
-    setLevelIdx(nl); setQIdx(0); setLevelCorrect(0); setScreen("level");
+    setFlying(true);
+    setScreen("level");
+    window.setTimeout(() => {
+      setLevelIdx(nl); setQIdx(0); setLevelCorrect(0); setShowHint(false);
+      setFlying(false);
+    }, 1400);
     void savePlayerState({
       current_level_idx: nl,
       current_question_idx: 0,
