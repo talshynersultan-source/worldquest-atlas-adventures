@@ -523,8 +523,17 @@ function Index() {
 
         {/* Two-column: image + question side-by-side on desktop */}
         <div className="grid gap-3 md:grid-cols-2">
-          <div className="overflow-hidden rounded-2xl shadow-xl">
-            <img src={level.image} alt={level.monument} className="h-44 w-full object-cover md:h-[300px]" />
+          <div className="grid grid-cols-2 gap-2">
+            {level.images.map((src, i) => (
+              <div key={i} className="overflow-hidden rounded-2xl shadow-xl">
+                <img
+                  src={src}
+                  alt={`${level.monument} ${i + 1}`}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  className="h-44 w-full object-cover md:h-[300px] hover:scale-105 transition"
+                />
+              </div>
+            ))}
           </div>
 
           <div className="relative rounded-2xl bg-card p-4 shadow-xl">
@@ -550,7 +559,8 @@ function Index() {
                 <div className="text-[11px] font-bold uppercase tracking-wide text-primary">
                   {level.flag} Спрашивает житель {level.city}
                 </div>
-                <h3 className="mt-1 text-lg font-black md:text-xl">{question.q}</h3>
+                <h3 className="mt-1 text-lg font-black md:text-xl">🇷🇺 {question.qRu}</h3>
+                <h4 className="mt-0.5 text-sm font-semibold text-muted-foreground md:text-base">🇬🇧 {question.q}</h4>
               </div>
             </div>
 
