@@ -510,24 +510,34 @@ function Index() {
               </button>
             ) : (() => {
               const h = hintFor(question.answers);
-              const burst = ["✨","⭐","💫","🌟", ...level.symbols];
+              const burst = [
+                "✨","⭐","💫","🌟","🎆","🎇","✨","⭐","💫","🌟","🎆","🎇",
+                ...level.symbols, ...level.symbols,
+              ];
               return (
+                <>
+                  {/* Click-anywhere backdrop to dismiss the hint */}
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowHint(false)}
+                    aria-hidden
+                  />
                 <div className="animate-pop-in absolute left-0 right-0 bottom-full z-20 mb-2 rounded-xl border border-dashed border-primary/40 bg-card/95 p-3 text-xs space-y-1.5 shadow-2xl backdrop-blur">
                   {/* Burst of stars + country symbols when hint opens */}
                   <div className="pointer-events-none absolute inset-0 overflow-visible">
                     {burst.map((s, i) => {
                       const angle = (i / burst.length) * Math.PI * 2;
-                      const dist = 70 + (i % 3) * 20;
+                      const dist = 90 + (i % 5) * 30;
                       const bx = Math.cos(angle) * dist;
                       const by = Math.sin(angle) * dist;
                       return (
                         <span
                           key={i}
-                          className="absolute left-1/2 top-1/2 text-2xl animate-burst"
+                          className="absolute left-1/2 top-1/2 text-3xl animate-burst"
                           style={{
                             ["--bx" as string]: `${bx}px`,
                             ["--by" as string]: `${by}px`,
-                            animationDelay: `${i * 40}ms`,
+                            animationDelay: `${i * 25}ms`,
                           } as React.CSSProperties}
                         >
                           {s}
@@ -564,6 +574,7 @@ function Index() {
                   )}
                   <div className="text-muted-foreground">Можно писать на русском или английском.</div>
                 </div>
+                </>
               );
             })()}
             </div>
