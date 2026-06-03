@@ -491,22 +491,61 @@ function Index() {
           </div>
         </div>
 
-        {/* Always-visible level progress dots */}
-        <div className="mb-3 flex flex-wrap items-center justify-center gap-1.5 rounded-2xl bg-card/70 px-3 py-2 shadow-sm">
+        {/* Always-visible level switcher — click to jump to any level */}
+        <div className="mb-2 flex flex-wrap items-center justify-center gap-1.5 rounded-2xl bg-card/70 px-3 py-2 shadow-sm">
           {LEVELS.map((l, i) => {
             const done = completedLevels.has(l.id);
             const current = i === levelIdx;
             return (
-              <div
+              <button
                 key={l.id}
+                type="button"
                 title={`${l.country} — ${l.monument}`}
-                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-base transition ${
+                onClick={() => {
+                  if (i === levelIdx) return;
+                  setLevelIdx(i);
+                  setQIdx(0);
+                  setInput("");
+                  setFeedback(null);
+                  setShowHint(false);
+                  void savePlayerState({ current_level_idx: i, current_question_idx: 0 });
+                }}
+                className={`flex h-9 w-9 items-center justify-center rounded-full border-2 text-base transition hover:scale-110 ${
                   current ? "border-primary bg-primary/15 scale-110" :
-                  done ? "border-accent bg-accent/20" : "border-muted bg-card opacity-60"
+                  done ? "border-accent bg-accent/20" : "border-muted bg-card opacity-70 hover:opacity-100"
                 }`}
               >
-                {done ? "✅" : l.flag}
-              </div>
+                {done && !current ? "✅" : l.flag}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Question switcher — click to jump to any question of the current level */}
+        <div className="mb-3 flex items-center justify-center gap-2">
+          {[0, 1, 2].map((i) => {
+            const current = i === qIdx;
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => {
+                  if (i === qIdx) return;
+                  setQIdx(i);
+                  setInput("");
+                  setFeedback(null);
+                  setShowHint(false);
+                  void savePlayerState({ current_question_idx: i });
+                }}
+                className={`flex h-9 min-w-9 items-center justify-center rounded-full border-2 px-3 text-sm font-bold transition hover:scale-110 ${
+                  current
+                    ? "border-primary bg-primary text-primary-foreground scale-110"
+                    : "border-muted bg-card text-foreground opacity-80 hover:opacity-100"
+                }`}
+                title={`Вопрос ${i + 1}`}
+              >
+                {i + 1}
+              </button>
             );
           })}
         </div>
