@@ -28,9 +28,9 @@ export const LEVELS: Level[] = [
     fact: "The Eiffel Tower was built in 1889 for the World's Fair and grows 6 inches taller in summer heat!",
     vocab: ["Tour Eiffel", "Paris"],
     questions: [
-      { q: "What monument is shown in this image?", answers: ["eiffel tower", "eiffel", "tour eiffel"], explain: "It's the iconic Eiffel Tower." },
-      { q: "Which country is it located in?", answers: ["france"], explain: "It stands in France." },
-      { q: "Which city hosts this landmark?", answers: ["paris"], explain: "It's in Paris, the capital of France." },
+      { q: "What monument is shown in this image?", answers: ["eiffel tower", "eiffel", "tour eiffel", "эйфелева башня", "эйфелева", "эйфель"], explain: "It's the iconic Eiffel Tower." },
+      { q: "Which country is it located in?", answers: ["france", "франция"], explain: "It stands in France." },
+      { q: "Which city hosts this landmark?", answers: ["paris", "париж"], explain: "It's in Paris, the capital of France." },
     ],
   },
   {
@@ -40,9 +40,9 @@ export const LEVELS: Level[] = [
     fact: "Big Ben is actually the name of the great bell inside the tower — the tower is called Elizabeth Tower.",
     vocab: ["Clock tower", "London"],
     questions: [
-      { q: "What monument is shown in this image?", answers: ["big ben", "elizabeth tower"], explain: "That's Big Ben!" },
-      { q: "Which country is it in?", answers: ["uk", "united kingdom", "england", "britain", "great britain"], explain: "It's in the United Kingdom." },
-      { q: "Which city hosts it?", answers: ["london"], explain: "Big Ben rises over London." },
+      { q: "What monument is shown in this image?", answers: ["big ben", "elizabeth tower", "биг бен", "бигбен"], explain: "That's Big Ben!" },
+      { q: "Which country is it in?", answers: ["uk", "united kingdom", "england", "britain", "great britain", "великобритания", "англия", "британия"], explain: "It's in the United Kingdom." },
+      { q: "Which city hosts it?", answers: ["london", "лондон"], explain: "Big Ben rises over London." },
     ],
   },
   {
@@ -52,9 +52,9 @@ export const LEVELS: Level[] = [
     fact: "The Great Wall is over 21,000 km long — built across many dynasties to defend the empire.",
     vocab: ["Great Wall", "Beijing"],
     questions: [
-      { q: "What monument is shown?", answers: ["great wall", "great wall of china", "the great wall"], explain: "The Great Wall of China." },
-      { q: "Which country is it in?", answers: ["china"], explain: "It winds through northern China." },
-      { q: "What is it famous for? (one word)", answers: ["length", "long", "defense", "wall"], explain: "Famous for its incredible length and defensive purpose." },
+      { q: "What monument is shown?", answers: ["great wall", "great wall of china", "the great wall", "великая китайская стена", "китайская стена", "стена"], explain: "The Great Wall of China." },
+      { q: "Which country is it in?", answers: ["china", "китай"], explain: "It winds through northern China." },
+      { q: "What is it famous for? (one word)", answers: ["length", "long", "defense", "wall", "длина", "стена", "защита", "длинная"], explain: "Famous for its incredible length and defensive purpose." },
     ],
   },
   {
@@ -64,9 +64,9 @@ export const LEVELS: Level[] = [
     fact: "The Statue of Liberty was a gift from France to the United States in 1886.",
     vocab: ["Liberty", "New York"],
     questions: [
-      { q: "What monument is shown?", answers: ["statue of liberty", "liberty"], explain: "The Statue of Liberty." },
-      { q: "Which country is it in?", answers: ["usa", "us", "united states", "america", "united states of america"], explain: "It stands in the USA." },
-      { q: "Which city is it in?", answers: ["new york", "new york city", "nyc"], explain: "It's in New York City harbor." },
+      { q: "What monument is shown?", answers: ["statue of liberty", "liberty", "статуя свободы", "свобода"], explain: "The Statue of Liberty." },
+      { q: "Which country is it in?", answers: ["usa", "us", "united states", "america", "united states of america", "сша", "америка", "соединенные штаты"], explain: "It stands in the USA." },
+      { q: "Which city is it in?", answers: ["new york", "new york city", "nyc", "нью йорк", "нью-йорк", "ньюйорк"], explain: "It's in New York City harbor." },
     ],
   },
   {
@@ -76,9 +76,9 @@ export const LEVELS: Level[] = [
     fact: "The Colosseum could hold up to 80,000 spectators and is nearly 2,000 years old!",
     vocab: ["Amphitheater", "Rome"],
     questions: [
-      { q: "What monument is shown?", answers: ["colosseum", "coliseum"], explain: "The mighty Colosseum." },
-      { q: "Which country is it in?", answers: ["italy"], explain: "It's in Italy." },
-      { q: "Which city hosts it?", answers: ["rome"], explain: "It stands in Rome." },
+      { q: "What monument is shown?", answers: ["colosseum", "coliseum", "колизей"], explain: "The mighty Colosseum." },
+      { q: "Which country is it in?", answers: ["italy", "италия"], explain: "It's in Italy." },
+      { q: "Which city hosts it?", answers: ["rome", "рим"], explain: "It stands in Rome." },
     ],
   },
   {
@@ -88,9 +88,9 @@ export const LEVELS: Level[] = [
     fact: "Burj Khalifa stands 828 meters tall — taller than two Eiffel Towers stacked!",
     vocab: ["Skyscraper", "Dubai"],
     questions: [
-      { q: "What monument is shown?", answers: ["burj khalifa", "burj"], explain: "Burj Khalifa, the world's tallest." },
-      { q: "Which country is it in?", answers: ["uae", "united arab emirates", "emirates"], explain: "It's in the UAE." },
-      { q: "Which city hosts it?", answers: ["dubai"], explain: "It dominates the Dubai skyline." },
+      { q: "What monument is shown?", answers: ["burj khalifa", "burj", "бурдж халифа", "бурж халифа", "бурдж"], explain: "Burj Khalifa, the world's tallest." },
+      { q: "Which country is it in?", answers: ["uae", "united arab emirates", "emirates", "оаэ", "эмираты", "объединенные арабские эмираты"], explain: "It's in the UAE." },
+      { q: "Which city hosts it?", answers: ["dubai", "дубай"], explain: "It dominates the Dubai skyline." },
     ],
   },
   {
@@ -100,15 +100,16 @@ export const LEVELS: Level[] = [
     fact: "Christ the Redeemer is 30 m tall and was named one of the New Seven Wonders of the World.",
     vocab: ["Statue", "Rio"],
     questions: [
-      { q: "What monument is shown?", answers: ["christ the redeemer", "cristo redentor", "redeemer", "christ"], explain: "Christ the Redeemer." },
-      { q: "Which country is it in?", answers: ["brazil", "brasil"], explain: "It's in Brazil." },
-      { q: "Which city hosts it?", answers: ["rio", "rio de janeiro"], explain: "Rio de Janeiro!" },
+      { q: "What monument is shown?", answers: ["christ the redeemer", "cristo redentor", "redeemer", "christ", "статуя христа", "христос искупитель", "христос"], explain: "Christ the Redeemer." },
+      { q: "Which country is it in?", answers: ["brazil", "brasil", "бразилия"], explain: "It's in Brazil." },
+      { q: "Which city hosts it?", answers: ["rio", "rio de janeiro", "рио", "рио де жанейро", "рио-де-жанейро"], explain: "Rio de Janeiro!" },
     ],
   },
 ];
 
 export function checkAnswer(input: string, answers: string[]): "correct" | "close" | "wrong" {
-  const norm = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9 ]/g, "");
+  const norm = (s: string) =>
+    s.toLowerCase().trim().replace(/ё/g, "е").replace(/[^a-z0-9а-я ]/g, "").replace(/\s+/g, " ");
   const a = norm(input);
   if (!a) return "wrong";
   if (answers.some((x) => norm(x) === a)) return "correct";

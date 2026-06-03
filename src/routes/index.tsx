@@ -23,13 +23,14 @@ export const Route = createFileRoute("/")({
 type Screen = "home" | "level" | "summary" | "end";
 const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
 
-function hintFor(answers: string[]): string {
+function hintFor(answers: string[]): { masked: string; letters: number; words: number } {
   const a = answers[0] ?? "";
-  return a
-    .split(" ")
-    .map((w) => (w.length > 0 ? w[0].toUpperCase() + " " + "_ ".repeat(Math.max(0, w.length - 1)).trim() : ""))
-    .join("   ")
-    .trim();
+  const words = a.split(" ").filter(Boolean);
+  const masked = words
+    .map((w) => w[0].toUpperCase() + "•".repeat(Math.max(0, w.length - 1)))
+    .join(" ");
+  const letters = words.reduce((n, w) => n + w.length, 0);
+  return { masked, letters, words: words.length };
 }
 
 function Index() {
@@ -382,11 +383,12 @@ function Index() {
         </div>
 
         {flying && (
-          <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden bg-gradient-to-b from-sky-200/80 to-sky-50/60">
-            <div className="absolute top-1/2 left-0 text-7xl animate-plane-fly">✈️</div>
-            <div className="absolute top-[30%] left-[20%] text-6xl opacity-70 animate-cloud-drift">☁️</div>
-            <div className="absolute top-[60%] left-[50%] text-5xl opacity-70 animate-cloud-drift">☁️</div>
-            <div className="absolute bottom-10 left-0 right-0 text-center text-2xl font-bold text-foreground/80">Летим к следующему вопросу...</div>
+          <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden bg-gradient-to-b from-sky-200/90 to-sky-50/70">
+            <div className="absolute top-1/2 left-0 text-[12rem] md:text-[16rem] animate-plane-fly drop-shadow-2xl">✈️</div>
+            <div className="absolute top-[20%] left-[15%] text-8xl opacity-70 animate-cloud-drift">☁️</div>
+            <div className="absolute top-[55%] left-[45%] text-7xl opacity-70 animate-cloud-drift">☁️</div>
+            <div className="absolute top-[40%] left-[70%] text-8xl opacity-60 animate-cloud-drift">☁️</div>
+            <div className="absolute bottom-12 left-0 right-0 text-center text-3xl md:text-4xl font-bold text-foreground/80">Летим к следующему вопросу...</div>
           </div>
         )}
 
@@ -412,7 +414,7 @@ function Index() {
               autoFocus
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="✍️ Напишите ваш ответ здесь..."
+              placeholder="✍️ Ответ (на русском или English)..."
               disabled={!!feedback}
               className="h-12 text-base border-2 border-primary/40 focus-visible:border-primary"
             />
@@ -431,13 +433,19 @@ function Index() {
               >
                 💡 Показать подсказку
               </button>
-            ) : (
-              <div className="rounded-xl border border-dashed border-primary/40 bg-accent/10 p-2 text-xs">
-                <div className="font-bold text-primary">💡 Подсказка</div>
-                <div className="mt-1">Страна: <b>{level.country}</b> {level.flag} · Город: <b>{level.city}</b></div>
-                <div className="mt-1 font-mono tracking-widest">{hintFor(question.answers)}</div>
-              </div>
-            )}
+            ) : (() => {
+              const h = hintFor(question.answers);
+              return (
+                <div className="rounded-xl border border-dashed border-primary/40 bg-accent/10 p-3 text-xs space-y-1.5">
+                  <div className="font-bold text-primary text-sm">💡 Подсказка</div>
+                  <div>🌍 Страна: <b>{level.country}</b> {level.flag}</div>
+                  <div>🏙️ Город: <b>{level.city}</b></div>
+                  <div>🔤 Букв в ответе: <b>{h.letters}</b> ({h.words === 1 ? "1 слово" : `${h.words} слова`})</div>
+                  <div>✏️ Первая буква: <span className="font-mono text-base tracking-widest text-primary font-bold">{h.masked}</span></div>
+                  <div className="text-muted-foreground">Можно писать на русском или английском.</div>
+                </div>
+              );
+            })()}
             </div>
 
             {feedback && (
