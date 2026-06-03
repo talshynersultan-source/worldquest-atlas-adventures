@@ -25,43 +25,94 @@ const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮
 
 function PlaneSVG() {
   return (
-    <svg width="170" height="80" viewBox="0 0 170 80" className="drop-shadow-2xl">
+    <svg width="210" height="100" viewBox="0 0 210 100" className="drop-shadow-2xl">
       <defs>
         <linearGradient id="fuselage" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="55%" stopColor="#e6ecf3" />
-          <stop offset="100%" stopColor="#9aa6b2" />
+          <stop offset="35%" stopColor="#f1f5f9" />
+          <stop offset="70%" stopColor="#cbd5e1" />
+          <stop offset="100%" stopColor="#64748b" />
         </linearGradient>
-        <linearGradient id="wing" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="#cfd6de" />
-          <stop offset="100%" stopColor="#6c7682" />
+        <linearGradient id="wingTop" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#e2e8f0" />
+          <stop offset="100%" stopColor="#94a3b8" />
+        </linearGradient>
+        <linearGradient id="wingBack" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#94a3b8" />
+          <stop offset="100%" stopColor="#475569" />
         </linearGradient>
         <linearGradient id="stripe" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0%" stopColor="#0ea5e9" />
-          <stop offset="100%" stopColor="#2563eb" />
+          <stop offset="0%" stopColor="#0284c7" />
+          <stop offset="50%" stopColor="#0ea5e9" />
+          <stop offset="100%" stopColor="#1e40af" />
         </linearGradient>
+        <linearGradient id="tailGrad" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#1e40af" />
+          <stop offset="100%" stopColor="#0ea5e9" />
+        </linearGradient>
+        <radialGradient id="engineGrad" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0%" stopColor="#1e293b" />
+          <stop offset="70%" stopColor="#475569" />
+          <stop offset="100%" stopColor="#0f172a" />
+        </radialGradient>
       </defs>
-      {/* Contrail */}
-      <path d="M 10 44 Q 30 40 55 44" stroke="white" strokeOpacity="0.7" strokeWidth="5" strokeLinecap="round" fill="none" />
-      {/* Tail fin */}
-      <path d="M 50 44 L 60 22 L 70 44 Z" fill="url(#wing)" />
-      {/* Main wing (back) */}
-      <path d="M 70 46 L 95 60 L 130 60 L 110 46 Z" fill="url(#wing)" />
-      {/* Fuselage */}
-      <path d="M 55 44 Q 80 30 140 38 Q 158 40 162 44 Q 158 48 140 50 Q 80 58 55 44 Z" fill="url(#fuselage)" stroke="#5b6573" strokeWidth="0.6" />
-      {/* Cheat-line stripe */}
-      <path d="M 60 44 Q 100 41 158 44" stroke="url(#stripe)" strokeWidth="1.6" fill="none" />
+      {/* Contrail (long, soft) */}
+      <path d="M 0 54 Q 25 50 55 54" stroke="white" strokeOpacity="0.55" strokeWidth="7" strokeLinecap="round" fill="none" />
+      <path d="M 0 54 Q 25 52 55 54" stroke="white" strokeOpacity="0.9" strokeWidth="3" strokeLinecap="round" fill="none" />
+
+      {/* Rear wing (background) — swept */}
+      <path d="M 78 54 L 110 78 L 148 78 L 122 54 Z" fill="url(#wingBack)" />
+      <path d="M 110 78 L 148 78 L 145 80 L 112 80 Z" fill="#334155" opacity="0.6" />
+
+      {/* Tail fin with airline livery */}
+      <path d="M 52 54 L 64 22 L 78 54 Z" fill="url(#tailGrad)" />
+      <path d="M 58 40 L 70 30 L 74 40 Z" fill="#ffffff" opacity="0.85" />
+
+      {/* Horizontal stabilizers */}
+      <path d="M 56 52 L 42 46 L 50 54 Z" fill="url(#wingBack)" />
+      <path d="M 56 56 L 42 62 L 50 54 Z" fill="url(#wingBack)" opacity="0.85" />
+
+      {/* Fuselage — long, tapered */}
+      <path d="M 56 54 Q 90 36 170 46 Q 192 49 198 54 Q 192 59 170 62 Q 90 72 56 54 Z"
+        fill="url(#fuselage)" stroke="#475569" strokeWidth="0.6" />
+
+      {/* Belly shadow */}
+      <path d="M 70 60 Q 120 70 190 58 Q 170 64 120 66 Q 85 66 70 60 Z" fill="#64748b" opacity="0.35" />
+
+      {/* Cheat-line stripes */}
+      <path d="M 60 54 Q 110 49 195 54" stroke="url(#stripe)" strokeWidth="1.6" fill="none" />
+      <path d="M 60 56.5 Q 110 52 195 56" stroke="#1e3a8a" strokeOpacity="0.5" strokeWidth="0.6" fill="none" />
+
+      {/* Nose cone (radome) */}
+      <path d="M 188 50 Q 200 52 199 54 Q 200 56 188 58 Z" fill="#1e293b" />
+
       {/* Cockpit windows */}
-      <path d="M 148 41 Q 156 41 159 43 L 156 45 Q 152 44 148 44 Z" fill="#1e293b" />
-      {/* Passenger windows */}
-      {Array.from({ length: 9 }).map((_, i) => (
-        <circle key={i} cx={75 + i * 8} cy={43} r={1.1} fill="#1e293b" />
+      <path d="M 178 48 Q 188 47 192 50 L 188 52 Q 184 51 178 51 Z" fill="#0f172a" />
+      <path d="M 180 49 L 186 49 L 187 50.5 L 180 50.5 Z" fill="#38bdf8" opacity="0.7" />
+
+      {/* Passenger windows row */}
+      {Array.from({ length: 16 }).map((_, i) => (
+        <rect key={i} x={75 + i * 6.5} y={52} width={2.6} height={1.4} rx={0.5} fill="#0f172a" />
       ))}
-      {/* Front wing (over) */}
-      <path d="M 78 44 L 70 70 L 100 70 L 100 50 Z" fill="url(#wing)" opacity="0.95" />
-      {/* Engines */}
-      <ellipse cx="98" cy="58" rx="7" ry="3" fill="#3b4452" />
-      <ellipse cx="100" cy="58" rx="2" ry="1.5" fill="#0f172a" />
+
+      {/* Door outlines */}
+      <rect x="80" y="50" width="3" height="5" rx="0.6" fill="none" stroke="#94a3b8" strokeWidth="0.3" />
+      <rect x="160" y="50" width="3" height="5" rx="0.6" fill="none" stroke="#94a3b8" strokeWidth="0.3" />
+
+      {/* Front wing (foreground) — swept with winglet */}
+      <path d="M 88 54 L 76 88 L 118 88 L 116 56 Z" fill="url(#wingTop)" />
+      <path d="M 76 88 L 72 92 L 78 92 L 82 88 Z" fill="url(#wingBack)" />
+      <path d="M 116 56 L 118 88 L 116 88 L 114 56 Z" fill="#475569" opacity="0.5" />
+
+      {/* Engine nacelle (foreground) */}
+      <ellipse cx="100" cy="74" rx="11" ry="4.2" fill="url(#engineGrad)" />
+      <ellipse cx="100" cy="74" rx="11" ry="4.2" fill="none" stroke="#1e293b" strokeWidth="0.4" />
+      <ellipse cx="92" cy="74" rx="2.8" ry="3.2" fill="#0f172a" />
+      <circle cx="92" cy="74" r="1.2" fill="#475569" />
+      <ellipse cx="109" cy="74" rx="1.5" ry="2.6" fill="#0f172a" opacity="0.7" />
+
+      {/* Engine pylon */}
+      <path d="M 98 70 L 102 70 L 104 62 L 96 62 Z" fill="url(#wingBack)" />
     </svg>
   );
 }
