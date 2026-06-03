@@ -173,3 +173,36 @@
   100% { transform: translateX(20%); opacity: 0; }
 }
 .animate-cloud-drift { animation: cloud-drift 1.4s ease-in-out forwards; }
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-bob { animation: bob 2.4s ease-in-out infinite; }
+
+@keyframes sparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+  50% { transform: scale(1.25) rotate(20deg); opacity: 1; }
+}
+.animate-sparkle { animation: sparkle 1.6s ease-in-out infinite; }
+
+@keyframes globe-spin {
+  0% { transform: scale(0.4) rotate(0deg); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: scale(1.4) rotate(720deg); opacity: 0; }
+}
+.animate-globe-spin { animation: globe-spin 1.4s ease-in-out forwards; }
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-20vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(60vh) rotate(540deg); opacity: 0; }
+}
+.animate-confetti { animation: confetti-fall 1.4s ease-out forwards; }
+
+@keyframes pop-in {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pop-in { animation: pop-in 0.4s ease-out both; }

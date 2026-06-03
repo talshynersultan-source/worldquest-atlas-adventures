@@ -52,6 +52,8 @@ function Index() {
   const [feedback, setFeedback] = useState<null | { kind: "correct" | "close" | "wrong"; msg: string; explain: string; gain: number }>(null);
   const [levelCorrect, setLevelCorrect] = useState(0);
   const [flying, setFlying] = useState(false);
+  const [transitionKind, setTransitionKind] = useState<"plane" | "globe">("plane");
+  const [confetti, setConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
   // Load profile + progress when signed in
@@ -158,6 +160,10 @@ function Index() {
     setMoney(newMoney);
     setStats((s) => ({ ...s, total_correct: newTotalCorrect, total_wrong: newTotalWrong, best_score: newBest }));
     setFeedback({ kind: res, msg, explain: question.explain, gain });
+    if (res === "correct") {
+      setConfetti(true);
+      window.setTimeout(() => setConfetti(false), 1400);
+    }
     void savePlayerState({
       total_score: newScore,
       total_money: newMoney,
@@ -172,12 +178,13 @@ function Index() {
     setInput(""); setFeedback(null); setShowHint(false);
     if (qIdx < 2) {
       const nq = qIdx + 1;
+      setTransitionKind("globe");
       setFlying(true);
       window.setTimeout(() => {
         setQIdx(nq);
         setFlying(false);
         void savePlayerState({ current_question_idx: nq });
-      }, 1400);
+      }, 1300);
       return;
     }
     // Save level progress to backend
@@ -215,6 +222,7 @@ function Index() {
       return;
     }
     const nl = levelIdx + 1;
+    setTransitionKind("plane");
     setFlying(true);
     setScreen("level");
     window.setTimeout(() => {
@@ -388,21 +396,50 @@ function Index() {
 
         {flying && (
           <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden bg-gradient-to-b from-sky-200/90 to-sky-50/70">
-            <div className="absolute top-1/2 left-0 text-[12rem] md:text-[16rem] animate-plane-fly drop-shadow-2xl">✈️</div>
-            <div className="absolute top-[20%] left-[15%] text-8xl opacity-70 animate-cloud-drift">☁️</div>
-            <div className="absolute top-[55%] left-[45%] text-7xl opacity-70 animate-cloud-drift">☁️</div>
-            <div className="absolute top-[40%] left-[70%] text-8xl opacity-60 animate-cloud-drift">☁️</div>
-            <div className="absolute bottom-12 left-0 right-0 text-center text-3xl md:text-4xl font-bold text-foreground/80">Летим к следующему вопросу...</div>
+            {transitionKind === "plane" ? (
+              <>
+                <div className="absolute top-1/2 left-0 text-[12rem] md:text-[16rem] animate-plane-fly drop-shadow-2xl">✈️</div>
+                <div className="absolute top-[20%] left-[15%] text-8xl opacity-70 animate-cloud-drift">☁️</div>
+                <div className="absolute top-[55%] left-[45%] text-7xl opacity-70 animate-cloud-drift">☁️</div>
+                <div className="absolute top-[40%] left-[70%] text-8xl opacity-60 animate-cloud-drift">☁️</div>
+                <div className="absolute bottom-12 left-0 right-0 text-center text-3xl md:text-4xl font-bold text-foreground/80">Летим к следующей стране...</div>
+              </>
+            ) : (
+              <>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-[10rem] md:text-[14rem] animate-globe-spin drop-shadow-2xl">🌍</div>
+                </div>
+                <div className="absolute top-[18%] left-[12%] text-6xl animate-sparkle">✨</div>
+                <div className="absolute top-[28%] right-[14%] text-5xl animate-sparkle">⭐</div>
+                <div className="absolute bottom-[22%] left-[20%] text-5xl animate-sparkle">💫</div>
+                <div className="absolute bottom-[28%] right-[18%] text-6xl animate-sparkle">✨</div>
+                <div className="absolute bottom-12 left-0 right-0 text-center text-3xl md:text-4xl font-bold text-foreground/80">Крутим глобус... следующий вопрос!</div>
+              </>
+            )}
+          </div>
+        )}
+
+        {confetti && (
+          <div className="pointer-events-none fixed inset-0 z-40 overflow-hidden">
+            {["🎉","⭐","🎊","✨","🎈","💫","🌟","🎉","⭐","✨"].map((c, i) => (
+              <span
+                key={i}
+                className="absolute text-4xl animate-confetti"
+                style={{ left: `${10 + i * 9}%`, animationDelay: `${i * 60}ms` }}
+              >
+                {c}
+              </span>
+            ))}
           </div>
         )}
 
         {/* Two-column: image + question side-by-side on desktop */}
         <div className="grid gap-3 md:grid-cols-2">
           <div className="overflow-hidden rounded-2xl shadow-xl">
-            <img src={level.image} alt={level.monument} className="h-48 w-full object-cover md:h-[420px]" />
+            <img src={level.image} alt={level.monument} className="h-44 w-full object-cover md:h-[300px]" />
           </div>
 
-          <div className="rounded-2xl bg-card p-4 shadow-xl">
+          <div className="relative rounded-2xl bg-card p-4 shadow-xl">
             <div className="rounded-xl border-l-4 border-primary bg-accent/10 p-2">
               <div className="text-xs font-bold text-primary">{level.npc}</div>
               <p className="text-xs">{level.intro}</p>
@@ -418,7 +455,7 @@ function Index() {
                 loading="lazy"
                 width={72}
                 height={72}
-                className="h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-full border-2 border-primary bg-card object-cover shadow-md"
+                className="h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-full border-2 border-primary bg-card object-cover shadow-md animate-bob"
               />
               <div className="relative flex-1 rounded-2xl border-2 border-primary/30 bg-accent/15 p-3">
                 <div className="absolute -left-2 top-5 h-4 w-4 rotate-45 border-b-2 border-l-2 border-primary/30 bg-accent/15" />
@@ -443,21 +480,33 @@ function Index() {
             </Button>
             </form>
 
-            {/* Hint */}
-            <div className="mt-2">
+            {/* Hint — floats above as overlay so the input never gets pushed off-screen */}
+            <div className="relative mt-2">
             {!showHint ? (
               <button
                 type="button"
                 onClick={() => setShowHint(true)}
-                className="text-xs font-semibold text-primary underline hover:opacity-80"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-primary underline hover:opacity-80"
               >
-                💡 Показать подсказку
+                <span className="animate-sparkle">💡</span> Показать подсказку
               </button>
             ) : (() => {
               const h = hintFor(question.answers);
               return (
-                <div className="rounded-xl border border-dashed border-primary/40 bg-accent/10 p-3 text-xs space-y-1.5">
-                  <div className="font-bold text-primary text-sm">💡 Подсказка</div>
+                <div className="animate-pop-in absolute left-0 right-0 bottom-full z-20 mb-2 rounded-xl border border-dashed border-primary/40 bg-card/95 p-3 text-xs space-y-1.5 shadow-2xl backdrop-blur">
+                  <div className="flex items-center justify-between">
+                    <div className="font-bold text-primary text-sm flex items-center gap-1">
+                      <span className="animate-sparkle">💡</span> Подсказка
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowHint(false)}
+                      className="text-muted-foreground hover:text-foreground text-base leading-none"
+                      aria-label="Закрыть подсказку"
+                    >
+                      ✕
+                    </button>
+                  </div>
                   {h.ru.letters > 0 && (
                     <div className="rounded-lg bg-card/60 p-2">
                       <div className="text-[11px] font-semibold text-muted-foreground">🇷🇺 На русском</div>
