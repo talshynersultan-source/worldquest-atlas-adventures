@@ -62,26 +62,33 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(0.98 0.02 80);
-  --foreground: oklch(0.2 0.05 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.05 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.62 0.22 30);
-  --primary-foreground: oklch(0.99 0.01 80);
-  --secondary: oklch(0.75 0.18 200);
-  --secondary-foreground: oklch(0.15 0.05 250);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.82 0.18 90);
-  --accent-foreground: oklch(0.15 0.05 250);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  /* Claude-inspired warm canvas + coral system */
+  --radius: 0.5rem;
+  --background: oklch(0.975 0.006 85);        /* #faf9f5 canvas */
+  --foreground: oklch(0.18 0.004 60);         /* #141413 ink */
+  --card: oklch(0.93 0.012 80);               /* #efe9de surface-card */
+  --card-foreground: oklch(0.18 0.004 60);
+  --popover: oklch(0.975 0.006 85);
+  --popover-foreground: oklch(0.18 0.004 60);
+  --primary: oklch(0.62 0.12 40);             /* #cc785c coral */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.945 0.012 85);         /* #f5f0e8 surface-soft */
+  --secondary-foreground: oklch(0.18 0.004 60);
+  --muted: oklch(0.93 0.012 80);
+  --muted-foreground: oklch(0.50 0.008 80);   /* #6c6a64 */
+  --accent: oklch(0.74 0.09 180);             /* teal accent */
+  --accent-foreground: oklch(0.18 0.004 60);
+  --destructive: oklch(0.58 0.18 25);         /* #c64545 */
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.90 0.012 80);             /* #e6dfd8 hairline */
+  --input: oklch(0.90 0.012 80);
+  --ring: oklch(0.62 0.12 40);
+  --surface-dark: oklch(0.20 0.004 60);       /* #181715 */
+  --on-dark: oklch(0.975 0.006 85);
+  --primary-active: oklch(0.50 0.12 40);      /* #a9583e */
+  --font-display: "Instrument Serif", "Tiempos Headline", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +147,13 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.02em;
   }
 }
