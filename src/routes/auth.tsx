@@ -25,7 +25,7 @@ function getAuthErrorMessage(error: unknown) {
   }
 
   if (code === "invalid_credentials" || lowerMessage.includes("invalid login credentials")) {
-    return "Invalid email or password. If you just created the account, confirm your email first.";
+    return "Invalid email or password. If signup failed earlier, create a new account or reset the password.";
   }
 
   return error instanceof Error ? error.message : "Something went wrong";
