@@ -10,6 +10,17 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+function getAuthErrorMessage(error: unknown) {
+  const maybeAuthError = error as { status?: number; message?: string } | null;
+  const message = maybeAuthError?.message ?? "";
+
+  if (maybeAuthError?.status === 429 || message.toLowerCase().includes("rate limit")) {
+    return "Слишком много попыток регистрации. Подождите немного или войдите через Google.";
+  }
+
+  return error instanceof Error ? error.message : "Something went wrong";
+}
+
 function AuthPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -57,7 +68,7 @@ function AuthPage() {
       }
       navigate({ to: "/" });
     } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Something went wrong");
+      setErr(getAuthErrorMessage(e));
     } finally { setBusy(false); }
   };
 
