@@ -1,21 +1,31 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Sign in · World Quest" }] }),
+  head: () => ({ meta: [{ title: "Sign in - World Quest" }] }),
   component: AuthPage,
 });
 
 function getAuthErrorMessage(error: unknown) {
-  const maybeAuthError = error as { status?: number; message?: string } | null;
+  const maybeAuthError = error as { status?: number; message?: string; code?: string } | null;
   const message = maybeAuthError?.message ?? "";
+  const lowerMessage = message.toLowerCase();
+  const code = maybeAuthError?.code ?? "";
 
-  if (maybeAuthError?.status === 429 || message.toLowerCase().includes("rate limit")) {
-    return "Слишком много попыток регистрации. Подождите немного или войдите через Google.";
+  if (maybeAuthError?.status === 429 || lowerMessage.includes("rate limit")) {
+    return "Too many signup attempts. Please wait a bit and try again.";
+  }
+
+  if (code === "email_not_confirmed" || lowerMessage.includes("email not confirmed")) {
+    return "Email is not confirmed yet. Open the confirmation link from your email, then sign in.";
+  }
+
+  if (code === "invalid_credentials" || lowerMessage.includes("invalid login credentials")) {
+    return "Invalid email or password. If you just created the account, confirm your email first.";
   }
 
   return error instanceof Error ? error.message : "Something went wrong";
@@ -29,47 +39,48 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [googleBusy, setGoogleBusy] = useState(false);
 
-  useEffect(() => { if (user) navigate({ to: "/" }); }, [user, navigate]);
-
-  const signInGoogle = async () => {
-    setErr(null); setGoogleBusy(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: window.location.origin,
-        },
-      });
-      if (error) throw error;
-    } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Google sign-in failed");
-    } finally { setGoogleBusy(false); }
-  };
+  useEffect(() => {
+    if (user) navigate({ to: "/" });
+  }, [user, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErr(null); setBusy(true);
+    setErr(null);
+    setNotice(null);
+    setBusy(true);
+
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email, password,
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
           options: {
             emailRedirectTo: window.location.origin,
             data: { display_name: name || email.split("@")[0] },
           },
         });
+
         if (error) throw error;
+
+        if (!data.session) {
+          setNotice("Account created. Confirm your email first, then sign in.");
+          setMode("signin");
+          return;
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
+
       navigate({ to: "/" });
     } catch (e: unknown) {
       setErr(getAuthErrorMessage(e));
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -88,19 +99,14 @@ function AuthPage() {
           )}
           <Input type="email" required placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12" />
           <Input type="password" required minLength={6} placeholder="Password (min 6)" value={password} onChange={(e) => setPassword(e.target.value)} className="h-12" />
+          {notice && <div className="rounded-lg bg-primary/10 p-3 text-sm text-foreground">{notice}</div>}
           {err && <div className="rounded-lg bg-destructive/15 p-3 text-sm text-destructive">{err}</div>}
           <Button type="submit" disabled={busy} className="h-12 w-full rounded-full text-lg font-bold">
             {busy ? "..." : mode === "signup" ? "Create account" : "Sign in"}
           </Button>
         </form>
-        <div className="my-4 flex items-center gap-2 text-xs text-muted-foreground">
-          <div className="h-px flex-1 bg-border" /> или <div className="h-px flex-1 bg-border" />
-        </div>
-        <Button type="button" onClick={signInGoogle} disabled={googleBusy} variant="outline" className="h-12 w-full rounded-full text-base font-bold">
-          {googleBusy ? "..." : "🟢 Продолжить через Google"}
-        </Button>
         <button
-          onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setErr(null); }}
+          onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setErr(null); setNotice(null); }}
           className="mt-4 w-full text-sm text-muted-foreground hover:text-foreground"
         >
           {mode === "signup" ? "Already a traveler? Sign in" : "New here? Create an account"}
