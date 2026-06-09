@@ -30,6 +30,8 @@ type RandomQuiz = {
   questionEn: string;
   acceptedAnswers: string[];
   explanation: string;
+  hint: string;
+  stickers: string[];
   imageUrl: string;
   imageSourceUrl: string;
   imageTitle: string;
@@ -170,6 +172,7 @@ function Index() {
   const [randomFeedback, setRandomFeedback] = useState<null | { kind: "correct" | "close" | "wrong"; text: string }>(null);
   const [randomLoading, setRandomLoading] = useState(false);
   const [randomError, setRandomError] = useState<string | null>(null);
+  const [randomHintVisible, setRandomHintVisible] = useState(false);
 
   // Load profile + progress when signed in
   useEffect(() => {
@@ -242,11 +245,13 @@ function Index() {
     setRandomError(null);
     setRandomFeedback(null);
     setRandomAnswer("");
+    setRandomHintVisible(false);
     try {
       const quiz = await getRandomGeminiQuiz({
         data: { previousCountry: randomQuiz?.country },
       });
       setRandomQuiz(quiz);
+      window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Random quiz did not load.";
       setRandomError(message);
@@ -259,6 +264,7 @@ function Index() {
     e.preventDefault();
     if (!randomQuiz || randomFeedback) return;
     const result = checkAnswer(randomAnswer, randomQuiz.acceptedAnswers);
+    setRandomHintVisible(false);
     if (result === "correct") {
       setRandomFeedback({ kind: "correct", text: `Correct. ${randomQuiz.explanation}` });
       setScore((value) => value + 10);
@@ -500,8 +506,23 @@ function Index() {
 
   if (screen === "random") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-secondary/20 via-background to-accent/20 px-4 py-4">
-        <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl flex-col">
+      <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20 px-4 py-4">
+        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+          {(randomQuiz?.stickers?.length ? randomQuiz.stickers : ["🌍", "🧭", "📍", "✨"]).map((sticker, i) => (
+            <span
+              key={`${sticker}-${i}`}
+              className="absolute select-none text-4xl opacity-40 md:text-5xl"
+              style={{
+                left: `${8 + ((i * 23) % 78)}%`,
+                top: `${12 + ((i * 19) % 70)}%`,
+                transform: `rotate(${i % 2 ? 14 : -12}deg)`,
+              }}
+            >
+              {sticker}
+            </span>
+          ))}
+        </div>
+        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl flex-col">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-full bg-card px-4 py-2 shadow text-sm">
             <button onClick={() => setScreen("home")} className="font-bold text-primary hover:underline">
               Back
@@ -542,10 +563,10 @@ function Index() {
                   <img
                     src={randomQuiz.imageUrl}
                     alt={randomQuiz.monument}
-                    className="h-64 w-full object-cover sm:h-80 md:h-full md:min-h-[460px]"
+                    className="h-52 w-full object-cover sm:h-64 md:h-full md:min-h-[360px]"
                   />
                 ) : (
-                  <div className="flex h-64 items-center justify-center bg-accent/20 text-center sm:h-80 md:h-full md:min-h-[460px]">
+                  <div className="flex h-52 items-center justify-center bg-accent/20 text-center sm:h-64 md:h-full md:min-h-[360px]">
                     <div>
                       <div className="text-4xl">?</div>
                       <div className="mt-2 text-sm text-muted-foreground">No Wikimedia image found</div>
@@ -554,7 +575,7 @@ function Index() {
                 )}
               </div>
 
-              <div className="flex flex-col rounded-2xl bg-card p-4 shadow-xl md:min-h-[460px]">
+              <div className="flex flex-col rounded-2xl bg-card p-4 shadow-xl md:min-h-[360px]">
                 <div className="rounded-xl border-l-4 border-primary bg-primary/5 p-3">
                   <div className="text-xs font-bold uppercase tracking-wide text-primary">
                     {randomQuiz.country} · {randomQuiz.city}
@@ -568,7 +589,20 @@ function Index() {
                 <div className="mt-4 rounded-2xl border-2 border-primary/25 bg-accent/10 p-4">
                   <div className="text-xs font-bold uppercase tracking-wide text-primary">Question</div>
                   <h3 className="mt-2 text-xl font-black">{randomQuiz.questionRu}</h3>
-                  <h4 className="mt-1 text-base font-semibold text-muted-foreground">{randomQuiz.questionEn}</h4>
+                  <p className="mt-1 text-sm font-semibold text-muted-foreground">Answer in Russian or English.</p>
+                </div>
+
+                <div className="mt-3 rounded-xl bg-secondary/20 p-3">
+                  <button
+                    type="button"
+                    onClick={() => setRandomHintVisible((value) => !value)}
+                    className="text-sm font-bold text-primary underline"
+                  >
+                    {randomHintVisible ? "Hide hint" : "Show hint"}
+                  </button>
+                  {randomHintVisible && (
+                    <p className="mt-2 text-sm font-medium text-foreground/80">{randomQuiz.hint}</p>
+                  )}
                 </div>
 
                 <form onSubmit={submitRandomQuiz} className="mt-4 flex gap-2">
@@ -591,6 +625,9 @@ function Index() {
                     : randomFeedback.kind === "close" ? "bg-accent/30" : "bg-destructive/15"
                   }`}>
                     <div className="font-bold">{randomFeedback.text}</div>
+                    <Button onClick={() => void loadRandomQuiz()} size="sm" className="mt-3 rounded-full">
+                      Next random quiz
+                    </Button>
                   </div>
                 )}
 
@@ -605,9 +642,6 @@ function Index() {
                       Wikimedia source: {randomQuiz.imageTitle || randomQuiz.imageSourceUrl}
                     </a>
                   )}
-                  <Button onClick={() => void loadRandomQuiz()} variant="secondary" className="mt-3 w-full rounded-full">
-                    Next random quiz
-                  </Button>
                 </div>
               </div>
             </div>

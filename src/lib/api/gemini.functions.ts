@@ -31,6 +31,8 @@ type RandomQuiz = {
   questionEn: string;
   acceptedAnswers: string[];
   explanation: string;
+  hint: string;
+  stickers: string[];
   searchQuery: string;
 };
 
@@ -53,6 +55,8 @@ const fallbackQuizzes: RandomQuiz[] = [
     questionEn: "What is this famous landmark in Japan called?",
     acceptedAnswers: ["fushimi inari shrine", "fushimi inari", "фусими инари", "храм фусими инари"],
     explanation: "Fushimi Inari Shrine is famous for thousands of red torii gates in Kyoto.",
+    hint: "Look for thousands of bright red gates on a mountain path.",
+    stickers: ["🇯🇵", "⛩️", "🗻", "🌸"],
     searchQuery: "Fushimi Inari Shrine Kyoto photograph",
   },
   {
@@ -63,17 +67,21 @@ const fallbackQuizzes: RandomQuiz[] = [
     questionEn: "What is this white marble landmark in India called?",
     acceptedAnswers: ["taj mahal", "тадж махал", "тадж-махал"],
     explanation: "The Taj Mahal is a marble mausoleum in Agra and one of India's most famous landmarks.",
+    hint: "It is a white marble monument built beside the Yamuna River.",
+    stickers: ["🇮🇳", "🕌", "🪷", "🌶️"],
     searchQuery: "Taj Mahal Agra photograph",
   },
   {
     country: "Kazakhstan",
     city: "Astana",
-    monument: "Baiterek",
-    questionRu: "Как называется эта башня-символ Астаны?",
-    questionEn: "What is this tower symbol of Astana called?",
-    acceptedAnswers: ["baiterek", "bayterek", "байтерек", "бәйтерек"],
-    explanation: "Baiterek is a landmark tower in Astana, Kazakhstan.",
-    searchQuery: "Baiterek Astana photograph",
+    monument: "Khan Shatyr",
+    questionRu: "Как называется это здание в форме шатра в Астане?",
+    questionEn: "What is this tent-shaped landmark in Astana called?",
+    acceptedAnswers: ["khan shatyr", "han shatyr", "хан шатыр", "ханшатыр"],
+    explanation: "Khan Shatyr is a huge tent-shaped entertainment center in Astana, Kazakhstan.",
+    hint: "Its name means royal tent.",
+    stickers: ["🇰🇿", "🏕️", "🌾", "🏙️"],
+    searchQuery: "Khan Shatyr Astana photograph",
   },
 ];
 
@@ -83,6 +91,58 @@ function cleanText(text: string, maxLength = 220) {
     .replace(/^["'«]+|["'»]+$/g, "")
     .trim()
     .slice(0, maxLength);
+}
+
+function countryStickers(country: string) {
+  const key = country.toLowerCase();
+  const stickerMap: Record<string, string[]> = {
+    australia: ["🇦🇺", "🪃", "🏛️", "🌊"],
+    brazil: ["🇧🇷", "🗿", "🌴", "⚽"],
+    china: ["🇨🇳", "🐉", "🏮", "⛩️"],
+    egypt: ["🇪🇬", "𓂀", "🏜️", "☀️"],
+    france: ["🇫🇷", "🗼", "🥐", "🎨"],
+    germany: ["🇩🇪", "🏰", "🎻", "🌲"],
+    greece: ["🇬🇷", "🏛️", "🌊", "🫒"],
+    india: ["🇮🇳", "🕌", "🪷", "🌶️"],
+    italy: ["🇮🇹", "🏛️", "🍝", "🎭"],
+    japan: ["🇯🇵", "⛩️", "🗻", "🌸"],
+    kazakhstan: ["🇰🇿", "🏕️", "🌾", "🏙️"],
+    mexico: ["🇲🇽", "🌵", "🛕", "🎺"],
+    morocco: ["🇲🇦", "🕌", "🏜️", "🧿"],
+    peru: ["🇵🇪", "⛰️", "🛕", "☀️"],
+    spain: ["🇪🇸", "🏰", "🎨", "🌊"],
+    thailand: ["🇹🇭", "🛕", "🌺", "🐘"],
+    turkey: ["🇹🇷", "🕌", "🌉", "☕"],
+    "south korea": ["🇰🇷", "🏯", "🌸", "🎎"],
+    "united kingdom": ["🇬🇧", "🏰", "🎡", "☂️"],
+    "united states": ["🇺🇸", "🗽", "🌉", "🏙️"],
+  };
+  return stickerMap[key] ?? ["🌍", "🧭", "📍", "✨"];
+}
+
+function normalizeStickers(value: unknown, country: string) {
+  if (!Array.isArray(value)) return countryStickers(country);
+  const stickers = value
+    .map((item) => cleanText(String(item), 8))
+    .filter(Boolean)
+    .slice(0, 4);
+  return stickers.length ? stickers : countryStickers(country);
+}
+
+function keywordTokens(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/file:/g, " ")
+    .split(/[^a-zа-яё0-9]+/i)
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 4 && !["photo", "image", "photograph", "commons"].includes(token));
+}
+
+function titleMatchesLandmark(title: string, landmark: string) {
+  const titleTokens = keywordTokens(title);
+  const landmarkTokens = keywordTokens(landmark);
+  if (!landmarkTokens.length) return true;
+  return landmarkTokens.some((token) => titleTokens.includes(token));
 }
 
 function getGeminiConfig() {
@@ -148,6 +208,8 @@ function normalizeQuiz(raw: Partial<RandomQuiz>): RandomQuiz {
     questionEn: cleanText(raw.questionEn || "What is this landmark called?", 180),
     acceptedAnswers: Array.isArray(raw.acceptedAnswers) ? raw.acceptedAnswers : [],
     explanation: cleanText(raw.explanation || "This is a famous landmark.", 220),
+    hint: cleanText(raw.hint || `It is in ${raw.city || "this city"}, ${raw.country || "this country"}.`, 160),
+    stickers: normalizeStickers(raw.stickers, raw.country || "World"),
     searchQuery: cleanText(raw.searchQuery || raw.monument || "famous landmark photograph", 140),
   };
 
@@ -161,7 +223,7 @@ function normalizeQuiz(raw: Partial<RandomQuiz>): RandomQuiz {
   };
 }
 
-async function getCommonsImage(searchQuery: string) {
+async function getCommonsImage(searchQuery: string, landmark: string) {
   const apiUrl = new URL("https://commons.wikimedia.org/w/api.php");
   apiUrl.searchParams.set("action", "query");
   apiUrl.searchParams.set("format", "json");
@@ -182,7 +244,9 @@ async function getCommonsImage(searchQuery: string) {
     const info = page.imageinfo?.[0];
     return info?.mime?.startsWith("image/") && (info.thumburl || info.url);
   });
-  const page = pages[Math.floor(Math.random() * pages.length)];
+  const matchingPages = pages.filter((page) => titleMatchesLandmark(page.title || "", landmark));
+  const pagePool = matchingPages.length ? matchingPages : [];
+  const page = pagePool[Math.floor(Math.random() * pagePool.length)];
   const info = page?.imageinfo?.[0];
 
   if (!page || !info) return null;
@@ -241,6 +305,9 @@ export const getRandomGeminiQuiz = createServerFn({ method: "POST" })
       "Pick a real, visually recognizable landmark in the given country.",
       "Return only valid JSON. No markdown.",
       "The question should ask the player to identify the landmark from a photo.",
+      "Make questionRu the only player-facing question. Do not repeat the same sentence in questionEn.",
+      "Add one helpful hint that does not reveal the answer.",
+      "Add four small country-related emoji stickers.",
       "Include accepted answers in English and Russian when possible.",
       "",
       `Country: ${country}`,
@@ -254,6 +321,8 @@ export const getRandomGeminiQuiz = createServerFn({ method: "POST" })
       '  "questionEn": "English question",',
       '  "acceptedAnswers": ["answer 1", "answer 2"],',
       '  "explanation": "One short explanation in Russian",',
+      '  "hint": "One short hint without the answer",',
+      '  "stickers": ["emoji 1", "emoji 2", "emoji 3", "emoji 4"],',
       '  "searchQuery": "Specific Wikimedia Commons image search query"',
       "}",
     ].join("\n");
@@ -269,7 +338,7 @@ export const getRandomGeminiQuiz = createServerFn({ method: "POST" })
       quiz = fallbackQuiz;
     }
 
-    const image = await getCommonsImage(quiz.searchQuery || `${quiz.monument} ${quiz.country} photograph`);
+    const image = await getCommonsImage(quiz.searchQuery || `${quiz.monument} ${quiz.country} photograph`, quiz.monument);
 
     return {
       ...quiz,
