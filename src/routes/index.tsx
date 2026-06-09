@@ -623,7 +623,14 @@ function Index() {
                     {randomHintVisible ? "Скрыть подсказку" : "Показать подсказку"}
                   </button>
                   {randomHintVisible && (
-                    <p className="mt-2 text-sm font-medium text-foreground/80">{randomQuiz.hint}</p>
+                    <div className="relative mt-2 overflow-hidden rounded-lg bg-primary/10 p-3">
+                      <div className="pointer-events-none absolute right-2 top-1 flex gap-1 text-xl opacity-70">
+                        <span>🎆</span>
+                        <span>🎇</span>
+                        <span>✨</span>
+                      </div>
+                      <p className="pr-16 text-sm font-medium text-foreground/80">{randomQuiz.hint}</p>
+                    </div>
                   )}
                 </div>
 
