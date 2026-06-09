@@ -41,10 +41,31 @@ function AuthPage() {
   const [err, setErr] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   useEffect(() => {
     if (user) navigate({ to: "/" });
   }, [user, navigate]);
+
+  const signInGoogle = async () => {
+    setErr(null);
+    setNotice(null);
+    setGoogleBusy(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      if (error) throw error;
+    } catch (e: unknown) {
+      setErr(getAuthErrorMessage(e));
+    } finally {
+      setGoogleBusy(false);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,6 +126,12 @@ function AuthPage() {
             {busy ? "..." : mode === "signup" ? "Create account" : "Sign in"}
           </Button>
         </form>
+        <div className="my-4 flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="h-px flex-1 bg-border" /> or <div className="h-px flex-1 bg-border" />
+        </div>
+        <Button type="button" onClick={signInGoogle} disabled={googleBusy} variant="outline" className="h-12 w-full rounded-full text-base font-bold">
+          {googleBusy ? "..." : "Continue with Google"}
+        </Button>
         <button
           onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setErr(null); setNotice(null); }}
           className="mt-4 w-full text-sm text-muted-foreground hover:text-foreground"

@@ -358,7 +358,7 @@ function Index() {
         <img src={heroImg} alt="World landmarks collage" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background/90" />
         <div className="absolute top-4 right-4 z-20 flex items-center gap-3 rounded-full bg-card/90 px-4 py-2 shadow">
-          <span className="text-sm font-bold">👋 {displayName}</span>
+          <span className="text-sm font-bold">👋 {user.email}</span>
           <button onClick={signOut} className="text-xs text-muted-foreground hover:text-foreground">Sign out</button>
         </div>
         <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center">
