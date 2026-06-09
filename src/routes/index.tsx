@@ -147,6 +147,40 @@ function hintFor(answers: string[]) {
   return { ru: maskOne(ru), en: maskOne(en) };
 }
 
+function StudyNote({
+  monument,
+  city,
+  country,
+  explanation,
+}: {
+  monument: string;
+  city: string;
+  country: string;
+  explanation: string;
+}) {
+  return (
+    <div
+      className="mt-3 rounded-xl border-2 border-primary/20 p-4 text-sm text-foreground shadow-sm"
+      style={{
+        backgroundColor: "#fffdf8",
+        backgroundImage:
+          "linear-gradient(rgba(96, 165, 250, 0.22) 1px, transparent 1px), radial-gradient(circle, rgba(148, 163, 184, 0.45) 1px, transparent 1px)",
+        backgroundSize: "100% 28px, 18px 18px",
+      }}
+    >
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div className="text-base font-black tracking-wide text-primary">ЗАМЕТКИ</div>
+        <div className="text-3xl drop-shadow-sm">☀️</div>
+      </div>
+      <div className="space-y-1 leading-6">
+        <p><b>Слово:</b> {monument}</p>
+        <p><b>Откуда:</b> {city}, {country}</p>
+        <p><b>Чем популярно:</b> {explanation}</p>
+      </div>
+    </div>
+  );
+}
+
 function Index() {
   const { user, loading: authLoading } = useAuth();
   const [displayName, setDisplayName] = useState<string>("");
@@ -654,6 +688,14 @@ function Index() {
                     : randomFeedback.kind === "close" ? "bg-accent/30" : "bg-destructive/15"
                   }`}>
                     <div className="font-bold">{randomFeedback.text}</div>
+                    {randomFeedback.kind !== "correct" && (
+                      <StudyNote
+                        monument={randomQuiz.monument}
+                        city={randomQuiz.city}
+                        country={randomQuiz.country}
+                        explanation={randomQuiz.explanation}
+                      />
+                    )}
                     <Button onClick={() => void loadRandomQuiz()} size="sm" className="mt-3 rounded-full">
                       Следующий вопрос
                     </Button>
@@ -1081,6 +1123,14 @@ function Index() {
               <div className="mt-1 text-xs text-muted-foreground">
                 Всего правильных: <b>{stats.total_correct}</b> · Неправильных: <b>{stats.total_wrong}</b>
               </div>
+              {feedback.kind !== "correct" && (
+                <StudyNote
+                  monument={level.monument}
+                  city={level.city}
+                  country={level.country}
+                  explanation={question.explain || level.fact}
+                />
+              )}
               <Button onClick={next} className="mt-2 rounded-full" size="sm">
                 {qIdx < 2 ? "✈️ Следующий вопрос →" : "Посмотреть результаты →"}
               </Button>
