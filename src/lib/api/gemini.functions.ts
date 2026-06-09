@@ -92,7 +92,7 @@ function getGeminiConfig() {
   };
 }
 
-async function askGemini(prompt: string, maxOutputTokens = 160) {
+async function askGemini(prompt: string, maxOutputTokens = 160, jsonMode = false) {
   const { apiKey, model } = getGeminiConfig();
 
   if (!apiKey) return null;
@@ -110,6 +110,7 @@ async function askGemini(prompt: string, maxOutputTokens = 160) {
         generationConfig: {
           temperature: 0.8,
           maxOutputTokens,
+          ...(jsonMode ? { responseMimeType: "application/json" } : {}),
         },
       }),
     },
@@ -129,7 +130,11 @@ async function askGemini(prompt: string, maxOutputTokens = 160) {
 }
 
 function parseJsonObject(text: string) {
-  const match = text.match(/\{[\s\S]*\}/);
+  const cleaned = text
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .trim();
+  const match = cleaned.match(/\{[\s\S]*\}/);
   if (!match) throw new Error("Gemini returned no JSON object.");
   return JSON.parse(match[0]) as Partial<RandomQuiz>;
 }
@@ -254,12 +259,14 @@ export const getRandomGeminiQuiz = createServerFn({ method: "POST" })
     ].join("\n");
 
     let quiz: RandomQuiz;
-    const geminiText = await askGemini(prompt, 420);
+    const fallbackQuiz = fallbackQuizzes[Math.floor(Math.random() * fallbackQuizzes.length)];
 
-    if (geminiText) {
-      quiz = normalizeQuiz(parseJsonObject(geminiText));
-    } else {
-      quiz = fallbackQuizzes[Math.floor(Math.random() * fallbackQuizzes.length)];
+    try {
+      const geminiText = await askGemini(prompt, 420, true);
+      quiz = geminiText ? normalizeQuiz(parseJsonObject(geminiText)) : fallbackQuiz;
+    } catch (error) {
+      console.error("[Gemini random quiz] Falling back to built-in quiz:", error);
+      quiz = fallbackQuiz;
     }
 
     const image = await getCommonsImage(quiz.searchQuery || `${quiz.monument} ${quiz.country} photograph`);
