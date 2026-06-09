@@ -266,17 +266,17 @@ function Index() {
     const result = checkAnswer(randomAnswer, randomQuiz.acceptedAnswers);
     setRandomHintVisible(false);
     if (result === "correct") {
-      setRandomFeedback({ kind: "correct", text: `Correct. ${randomQuiz.explanation}` });
+      setRandomFeedback({ kind: "correct", text: `Правильно! ${randomQuiz.explanation}` });
       setScore((value) => value + 10);
       setMoney((value) => value + 5);
       return;
     }
     if (result === "close") {
-      setRandomFeedback({ kind: "close", text: `Close. The answer is ${randomQuiz.monument}. ${randomQuiz.explanation}` });
+      setRandomFeedback({ kind: "close", text: `Почти! Ответ: ${randomQuiz.monument}. ${randomQuiz.explanation}` });
       setScore((value) => value + 5);
       return;
     }
-    setRandomFeedback({ kind: "wrong", text: `Not quite. The answer is ${randomQuiz.monument}. ${randomQuiz.explanation}` });
+    setRandomFeedback({ kind: "wrong", text: `Не совсем. Ответ: ${randomQuiz.monument}. ${randomQuiz.explanation}` });
   };
 
   const start = () => {
@@ -467,13 +467,21 @@ function Index() {
           <p className="mt-4 max-w-xl text-lg text-foreground/80 md:text-xl">
             A geography adventure across the world's greatest landmarks.
           </p>
-          <Button
-            onClick={() => void loadRandomQuiz()}
-            variant="secondary"
-            className="mt-3 h-12 rounded-full px-8 text-base font-bold shadow-lg transition hover:scale-105"
-          >
-            AI Random Quiz
-          </Button>
+          <div className="mt-8 flex w-full max-w-xl flex-col justify-center gap-3 sm:flex-row">
+            <Button
+              onClick={start}
+              className="h-14 flex-1 rounded-full bg-primary px-8 text-xl font-bold text-primary-foreground shadow-2xl transition hover:scale-105"
+            >
+              {completedLevels.size > 0 && completedLevels.size < LEVELS.length ? "CONTINUE" : "PLAY"}
+            </Button>
+            <Button
+              onClick={() => void loadRandomQuiz()}
+              variant="secondary"
+              className="h-14 flex-1 rounded-full px-8 text-xl font-bold shadow-lg transition hover:scale-105"
+            >
+              AI Random Quiz
+            </Button>
+          </div>
           {completedLevels.size > 0 && (
             <div className="mt-4 rounded-full bg-card/80 px-5 py-2 text-sm font-bold">
               Progress: {completedLevels.size}/{LEVELS.length} stops · ⭐ {score} · 💸 {money}
@@ -484,12 +492,6 @@ function Index() {
             <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">✅ Правильных ответов: {stats.total_correct}</span>
             <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">❌ Неправильных ответов: {stats.total_wrong}</span>
           </div>
-          <Button
-            onClick={start}
-            className="mt-10 h-16 rounded-full bg-primary px-12 text-2xl font-bold text-primary-foreground shadow-2xl transition hover:scale-105"
-          >
-            {completedLevels.size > 0 && completedLevels.size < LEVELS.length ? "▶️ CONTINUE" : "▶️ PLAY"}
-          </Button>
           {completedLevels.size > 0 && (
             <button
               onClick={resetProgress}
@@ -525,12 +527,12 @@ function Index() {
         <div className="relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl flex-col">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-full bg-card px-4 py-2 shadow text-sm">
             <button onClick={() => setScreen("home")} className="font-bold text-primary hover:underline">
-              Back
+              Назад
             </button>
             <div className="font-bold">AI Random Quiz</div>
             <div className="flex items-center gap-3">
-              <span>Score {score}</span>
-              <span>Money {money}</span>
+              <span>Счёт {score}</span>
+              <span>Монеты {money}</span>
             </div>
           </div>
 
@@ -538,8 +540,8 @@ function Index() {
             <div className="flex flex-1 items-center justify-center rounded-2xl bg-card/80 p-8 text-center shadow-xl">
               <div>
                 <div className="text-4xl">AI</div>
-                <div className="mt-3 text-xl font-black">Generating a random country quiz...</div>
-                <p className="mt-2 text-sm text-muted-foreground">Gemini creates the question, Wikimedia finds the photo.</p>
+                <div className="mt-3 text-xl font-black">Создаю случайный квиз по стране...</div>
+                <p className="mt-2 text-sm text-muted-foreground">Gemini придумывает вопрос, Wikimedia ищет фото.</p>
               </div>
             </div>
           )}
@@ -547,10 +549,10 @@ function Index() {
           {!randomLoading && randomError && (
             <div className="flex flex-1 items-center justify-center rounded-2xl bg-card p-8 text-center shadow-xl">
               <div>
-                <div className="text-xl font-black text-destructive">Could not load AI quiz</div>
+                <div className="text-xl font-black text-destructive">Не удалось загрузить AI квиз</div>
                 <p className="mt-2 text-sm text-muted-foreground">{randomError}</p>
                 <Button onClick={() => void loadRandomQuiz()} className="mt-5 rounded-full">
-                  Try again
+                  Попробовать ещё раз
                 </Button>
               </div>
             </div>
@@ -569,7 +571,7 @@ function Index() {
                   <div className="flex h-52 items-center justify-center bg-accent/20 text-center sm:h-64 md:h-full md:min-h-[360px]">
                     <div>
                       <div className="text-4xl">?</div>
-                      <div className="mt-2 text-sm text-muted-foreground">No Wikimedia image found</div>
+                      <div className="mt-2 text-sm text-muted-foreground">Фото в Wikimedia не найдено</div>
                     </div>
                   </div>
                 )}
@@ -580,16 +582,16 @@ function Index() {
                   <div className="text-xs font-bold uppercase tracking-wide text-primary">
                     {randomQuiz.country} · {randomQuiz.city}
                   </div>
-                  <h2 className="mt-2 text-2xl font-black">AI generated challenge</h2>
+                  <h2 className="mt-2 text-2xl font-black">Случайный вопрос от AI</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Photo from Wikimedia Commons. Question from Gemini.
+                    Фото из Wikimedia Commons. Вопрос от Gemini.
                   </p>
                 </div>
 
                 <div className="mt-4 rounded-2xl border-2 border-primary/25 bg-accent/10 p-4">
-                  <div className="text-xs font-bold uppercase tracking-wide text-primary">Question</div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-primary">Вопрос</div>
                   <h3 className="mt-2 text-xl font-black">{randomQuiz.questionRu}</h3>
-                  <p className="mt-1 text-sm font-semibold text-muted-foreground">Answer in Russian or English.</p>
+                  <p className="mt-1 text-sm font-semibold text-muted-foreground">Отвечай на русском или английском.</p>
                 </div>
 
                 <div className="mt-3 rounded-xl bg-secondary/20 p-3">
@@ -598,7 +600,7 @@ function Index() {
                     onClick={() => setRandomHintVisible((value) => !value)}
                     className="text-sm font-bold text-primary underline"
                   >
-                    {randomHintVisible ? "Hide hint" : "Show hint"}
+                    {randomHintVisible ? "Скрыть подсказку" : "Показать подсказку"}
                   </button>
                   {randomHintVisible && (
                     <p className="mt-2 text-sm font-medium text-foreground/80">{randomQuiz.hint}</p>
@@ -611,11 +613,11 @@ function Index() {
                     value={randomAnswer}
                     onChange={(e) => setRandomAnswer(e.target.value)}
                     disabled={!!randomFeedback}
-                    placeholder="Answer in Russian or English..."
+                    placeholder="Ответ на русском или English..."
                     className="h-12 text-base"
                   />
                   <Button type="submit" disabled={!randomAnswer.trim() || !!randomFeedback} className="h-12 px-5">
-                    Submit
+                    Ответить
                   </Button>
                 </form>
 
@@ -626,7 +628,7 @@ function Index() {
                   }`}>
                     <div className="font-bold">{randomFeedback.text}</div>
                     <Button onClick={() => void loadRandomQuiz()} size="sm" className="mt-3 rounded-full">
-                      Next random quiz
+                      Следующий вопрос
                     </Button>
                   </div>
                 )}
@@ -733,7 +735,12 @@ function Index() {
       <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-3">
         {/* HUD */}
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-full bg-card px-4 py-2 shadow text-sm">
-          <div className="font-bold">Level {level.id} / {LEVELS.length}</div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setScreen("home")} className="font-bold text-primary hover:underline">
+              Назад
+            </button>
+            <div className="font-bold">Level {level.id} / {LEVELS.length}</div>
+          </div>
           <div className="flex items-center gap-3">
             <span>⭐ {score}</span>
             <span>💸 {money}</span>
