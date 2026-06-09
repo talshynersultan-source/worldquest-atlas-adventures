@@ -36,6 +36,7 @@ type RandomQuiz = {
   imageSourceUrl: string;
   imageTitle: string;
 };
+type RecentRandomQuiz = Pick<RandomQuiz, "country" | "city" | "monument">;
 const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
 
 function PlaneSVG() {
@@ -173,6 +174,7 @@ function Index() {
   const [randomLoading, setRandomLoading] = useState(false);
   const [randomError, setRandomError] = useState<string | null>(null);
   const [randomHintVisible, setRandomHintVisible] = useState(false);
+  const [recentRandomQuizzes, setRecentRandomQuizzes] = useState<RecentRandomQuiz[]>([]);
 
   // Load profile + progress when signed in
   useEffect(() => {
@@ -248,9 +250,22 @@ function Index() {
     setRandomHintVisible(false);
     try {
       const quiz = await getRandomGeminiQuiz({
-        data: { previousCountry: randomQuiz?.country },
+        data: {
+          previousCountry: randomQuiz?.country,
+          recentCountries: recentRandomQuizzes.map((item) => item.country),
+          recentCities: recentRandomQuizzes.map((item) => item.city),
+          recentMonuments: recentRandomQuizzes.map((item) => item.monument),
+        },
       });
       setRandomQuiz(quiz);
+      setRecentRandomQuizzes((items) => [
+        { country: quiz.country, city: quiz.city, monument: quiz.monument },
+        ...items.filter((item) => (
+          item.country !== quiz.country
+          && item.city !== quiz.city
+          && item.monument !== quiz.monument
+        )),
+      ].slice(0, 20));
       window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Random quiz did not load.";
@@ -510,19 +525,24 @@ function Index() {
     return (
       <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20 px-4 py-4">
         <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-          {(randomQuiz?.stickers?.length ? randomQuiz.stickers : ["🌍", "🧭", "📍", "✨"]).map((sticker, i) => (
+          {Array.from({ length: 18 }).map((_, i) => {
+            const stickers = randomQuiz?.stickers?.length ? randomQuiz.stickers : ["🌍", "🧭", "📍", "✨"];
+            const sticker = stickers[i % stickers.length];
+            return (
             <span
               key={`${sticker}-${i}`}
-              className="absolute select-none text-4xl opacity-40 md:text-5xl"
+              className="absolute bottom-[-8vh] select-none text-4xl opacity-45 animate-float-up md:text-5xl"
               style={{
-                left: `${8 + ((i * 23) % 78)}%`,
-                top: `${12 + ((i * 19) % 70)}%`,
+                left: `${(i * 5.5 + 2) % 96}%`,
+                animationDelay: `${(i * 0.8) % 12}s`,
+                animationDuration: `${11 + (i % 5) * 2}s`,
                 transform: `rotate(${i % 2 ? 14 : -12}deg)`,
               }}
             >
               {sticker}
             </span>
-          ))}
+            );
+          })}
         </div>
         <div className="relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl flex-col">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-full bg-card px-4 py-2 shadow text-sm">
@@ -531,8 +551,8 @@ function Index() {
             </button>
             <div className="font-bold">AI Random Quiz</div>
             <div className="flex items-center gap-3">
-              <span>Счёт {score}</span>
-              <span>Монеты {money}</span>
+              <span>Score {score}</span>
+              <span>Money {money}</span>
             </div>
           </div>
 

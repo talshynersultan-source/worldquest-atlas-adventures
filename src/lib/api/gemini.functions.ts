@@ -12,6 +12,9 @@ const aiHintInput = z.object({
 
 const randomQuizInput = z.object({
   previousCountry: z.string().optional(),
+  recentCountries: z.array(z.string()).optional(),
+  recentCities: z.array(z.string()).optional(),
+  recentMonuments: z.array(z.string()).optional(),
 });
 
 type GeminiResponse = {
@@ -143,6 +146,23 @@ function titleMatchesLandmark(title: string, landmark: string) {
   const landmarkTokens = keywordTokens(landmark);
   if (!landmarkTokens.length) return true;
   return landmarkTokens.some((token) => titleTokens.includes(token));
+}
+
+function normalizeKey(value: string) {
+  return value.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function includesKey(values: string[] | undefined, value: string) {
+  const key = normalizeKey(value);
+  return (values ?? []).some((item) => normalizeKey(item) === key);
+}
+
+function isRecentQuiz(quiz: RandomQuiz, data: z.infer<typeof randomQuizInput>) {
+  return (
+    includesKey(data.recentCountries, quiz.country)
+    || includesKey(data.recentCities, quiz.city)
+    || includesKey(data.recentMonuments, quiz.monument)
+  );
 }
 
 function getGeminiConfig() {
@@ -293,11 +313,23 @@ export const getGeminiHint = createServerFn({ method: "POST" })
 export const getRandomGeminiQuiz = createServerFn({ method: "POST" })
   .inputValidator(randomQuizInput)
   .handler(async ({ data }) => {
-    const countryPool = [
+    const allCountries = [
       "Kazakhstan", "Japan", "India", "Egypt", "Mexico", "Brazil", "Turkey", "Spain",
       "France", "Italy", "China", "United Kingdom", "United States", "South Korea",
-      "Thailand", "Greece", "Australia", "Morocco", "Peru", "Germany",
-    ].filter((country) => country !== data.previousCountry);
+      "Thailand", "Greece", "Australia", "Morocco", "Peru", "Germany", "Canada",
+      "Argentina", "Chile", "Colombia", "Portugal", "Netherlands", "Belgium", "Austria",
+      "Switzerland", "Czech Republic", "Poland", "Hungary", "Romania", "Bulgaria",
+      "Croatia", "Serbia", "Norway", "Sweden", "Finland", "Denmark", "Iceland",
+      "Ireland", "Ukraine", "Georgia", "Armenia", "Azerbaijan", "Uzbekistan",
+      "Kyrgyzstan", "Mongolia", "Indonesia", "Malaysia", "Singapore", "Vietnam",
+      "Cambodia", "Laos", "Myanmar", "Philippines", "Nepal", "Sri Lanka", "Pakistan",
+      "Iran", "Iraq", "Jordan", "Israel", "Saudi Arabia", "United Arab Emirates",
+      "Qatar", "Oman", "Ethiopia", "Kenya", "Tanzania", "South Africa", "Madagascar",
+      "Tunisia", "Algeria", "Nigeria", "Ghana", "Senegal", "New Zealand", "Fiji",
+    ];
+    const countryPool = allCountries.filter((country) => (
+      country !== data.previousCountry && !includesKey(data.recentCountries, country)
+    ));
     const country = countryPool[Math.floor(Math.random() * countryPool.length)] || "Japan";
 
     const prompt = [
@@ -310,8 +342,12 @@ export const getRandomGeminiQuiz = createServerFn({ method: "POST" })
       "Add one helpful Russian hint that does not reveal the answer.",
       "Add four small country-related emoji stickers.",
       "Include accepted answers in English and Russian when possible.",
+      "Do not use any country, city, or landmark from the avoid lists.",
       "",
       `Country: ${country}`,
+      `Avoid countries: ${(data.recentCountries ?? []).join(", ") || "none"}`,
+      `Avoid cities: ${(data.recentCities ?? []).join(", ") || "none"}`,
+      `Avoid landmarks: ${(data.recentMonuments ?? []).join(", ") || "none"}`,
       "",
       "JSON shape:",
       "{",
@@ -328,14 +364,24 @@ export const getRandomGeminiQuiz = createServerFn({ method: "POST" })
       "}",
     ].join("\n");
 
-    let quiz: RandomQuiz;
-    const fallbackQuiz = fallbackQuizzes[Math.floor(Math.random() * fallbackQuizzes.length)];
+    let quiz: RandomQuiz | null = null;
+    const fallbackQuiz = fallbackQuizzes.find((item) => !isRecentQuiz(item, data))
+      || fallbackQuizzes[Math.floor(Math.random() * fallbackQuizzes.length)];
 
-    try {
-      const geminiText = await askGemini(prompt, 420, true);
-      quiz = geminiText ? normalizeQuiz(parseJsonObject(geminiText)) : fallbackQuiz;
-    } catch (error) {
-      console.error("[Gemini random quiz] Falling back to built-in quiz:", error);
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const geminiText = await askGemini(prompt, 520, true);
+        const candidate = geminiText ? normalizeQuiz(parseJsonObject(geminiText)) : null;
+        if (candidate && !isRecentQuiz(candidate, data)) {
+          quiz = candidate;
+          break;
+        }
+      } catch (error) {
+        console.error("[Gemini random quiz] Generation attempt failed:", error);
+      }
+    }
+
+    if (!quiz) {
       quiz = fallbackQuiz;
     }
 
