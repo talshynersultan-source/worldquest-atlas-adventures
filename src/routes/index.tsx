@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "@tanstack/react-router";
+import { getGeminiHint, getRandomGeminiQuiz } from "@/lib/api/gemini.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,7 +21,19 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Screen = "home" | "level" | "summary" | "end";
+type Screen = "home" | "level" | "summary" | "end" | "random";
+type RandomQuiz = {
+  country: string;
+  city: string;
+  monument: string;
+  questionRu: string;
+  questionEn: string;
+  acceptedAnswers: string[];
+  explanation: string;
+  imageUrl: string;
+  imageSourceUrl: string;
+  imageTitle: string;
+};
 const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
 
 function PlaneSVG() {
@@ -149,6 +162,14 @@ function Index() {
   const [transitionKind, setTransitionKind] = useState<"plane" | "globe">("plane");
   const [confetti, setConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [aiHint, setAiHint] = useState<string | null>(null);
+  const [aiHintLoading, setAiHintLoading] = useState(false);
+  const [aiHintError, setAiHintError] = useState<string | null>(null);
+  const [randomQuiz, setRandomQuiz] = useState<RandomQuiz | null>(null);
+  const [randomAnswer, setRandomAnswer] = useState("");
+  const [randomFeedback, setRandomFeedback] = useState<null | { kind: "correct" | "close" | "wrong"; text: string }>(null);
+  const [randomLoading, setRandomLoading] = useState(false);
+  const [randomError, setRandomError] = useState<string | null>(null);
 
   // Load profile + progress when signed in
   useEffect(() => {
@@ -184,6 +205,74 @@ function Index() {
   const level = LEVELS[levelIdx];
   const question = level?.questions[qIdx];
 
+  const resetQuestionHelpers = () => {
+    setShowHint(false);
+    setAiHint(null);
+    setAiHintError(null);
+    setAiHintLoading(false);
+  };
+
+  const askGeminiHint = async () => {
+    if (!level || !question || aiHintLoading) return;
+    setAiHintLoading(true);
+    setAiHintError(null);
+    try {
+      const result = await getGeminiHint({
+        data: {
+          city: level.city,
+          country: level.country,
+          monument: level.monument,
+          questionRu: question.qRu,
+          questionEn: question.q,
+          acceptedAnswers: question.answers,
+        },
+      });
+      setAiHint(result.hint);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Gemini did not answer.";
+      setAiHintError(message);
+    } finally {
+      setAiHintLoading(false);
+    }
+  };
+
+  const loadRandomQuiz = async () => {
+    setScreen("random");
+    setRandomLoading(true);
+    setRandomError(null);
+    setRandomFeedback(null);
+    setRandomAnswer("");
+    try {
+      const quiz = await getRandomGeminiQuiz({
+        data: { previousCountry: randomQuiz?.country },
+      });
+      setRandomQuiz(quiz);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Random quiz did not load.";
+      setRandomError(message);
+    } finally {
+      setRandomLoading(false);
+    }
+  };
+
+  const submitRandomQuiz = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!randomQuiz || randomFeedback) return;
+    const result = checkAnswer(randomAnswer, randomQuiz.acceptedAnswers);
+    if (result === "correct") {
+      setRandomFeedback({ kind: "correct", text: `Correct. ${randomQuiz.explanation}` });
+      setScore((value) => value + 10);
+      setMoney((value) => value + 5);
+      return;
+    }
+    if (result === "close") {
+      setRandomFeedback({ kind: "close", text: `Close. The answer is ${randomQuiz.monument}. ${randomQuiz.explanation}` });
+      setScore((value) => value + 5);
+      return;
+    }
+    setRandomFeedback({ kind: "wrong", text: `Not quite. The answer is ${randomQuiz.monument}. ${randomQuiz.explanation}` });
+  };
+
   const start = () => {
     // If all levels already completed, restart the journey from scratch
     if (completedLevels.size >= LEVELS.length) {
@@ -197,7 +286,7 @@ function Index() {
       });
     }
     setScreen("level");
-    setInput(""); setFeedback(null);
+    setInput(""); setFeedback(null); resetQuestionHelpers();
   };
 
   const resetProgress = async () => {
@@ -269,13 +358,14 @@ function Index() {
   };
 
   const next = () => {
-    setInput(""); setFeedback(null); setShowHint(false);
+    setInput(""); setFeedback(null); resetQuestionHelpers();
     if (qIdx < 2) {
       const nq = qIdx + 1;
       setTransitionKind("plane");
       setFlying(true);
       window.setTimeout(() => {
         setQIdx(nq);
+        resetQuestionHelpers();
         setFlying(false);
         void savePlayerState({ current_question_idx: nq });
       }, 2600);
@@ -320,7 +410,7 @@ function Index() {
     setFlying(true);
     setScreen("level");
     window.setTimeout(() => {
-      setLevelIdx(nl); setQIdx(0); setLevelCorrect(0); setShowHint(false);
+      setLevelIdx(nl); setQIdx(0); setLevelCorrect(0); resetQuestionHelpers();
       setFlying(false);
     }, 1400);
     void savePlayerState({
@@ -371,6 +461,13 @@ function Index() {
           <p className="mt-4 max-w-xl text-lg text-foreground/80 md:text-xl">
             A geography adventure across the world's greatest landmarks.
           </p>
+          <Button
+            onClick={() => void loadRandomQuiz()}
+            variant="secondary"
+            className="mt-3 h-12 rounded-full px-8 text-base font-bold shadow-lg transition hover:scale-105"
+          >
+            AI Random Quiz
+          </Button>
           {completedLevels.size > 0 && (
             <div className="mt-4 rounded-full bg-card/80 px-5 py-2 text-sm font-bold">
               Progress: {completedLevels.size}/{LEVELS.length} stops · ⭐ {score} · 💸 {money}
@@ -396,6 +493,125 @@ function Index() {
             </button>
           )}
           <p className="mt-6 text-sm text-foreground/70">7 stops · 21 questions · 1 world</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (screen === "random") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-secondary/20 via-background to-accent/20 px-4 py-4">
+        <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl flex-col">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-full bg-card px-4 py-2 shadow text-sm">
+            <button onClick={() => setScreen("home")} className="font-bold text-primary hover:underline">
+              Back
+            </button>
+            <div className="font-bold">AI Random Quiz</div>
+            <div className="flex items-center gap-3">
+              <span>Score {score}</span>
+              <span>Money {money}</span>
+            </div>
+          </div>
+
+          {randomLoading && (
+            <div className="flex flex-1 items-center justify-center rounded-2xl bg-card/80 p-8 text-center shadow-xl">
+              <div>
+                <div className="text-4xl">AI</div>
+                <div className="mt-3 text-xl font-black">Generating a random country quiz...</div>
+                <p className="mt-2 text-sm text-muted-foreground">Gemini creates the question, Wikimedia finds the photo.</p>
+              </div>
+            </div>
+          )}
+
+          {!randomLoading && randomError && (
+            <div className="flex flex-1 items-center justify-center rounded-2xl bg-card p-8 text-center shadow-xl">
+              <div>
+                <div className="text-xl font-black text-destructive">Could not load AI quiz</div>
+                <p className="mt-2 text-sm text-muted-foreground">{randomError}</p>
+                <Button onClick={() => void loadRandomQuiz()} className="mt-5 rounded-full">
+                  Try again
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {!randomLoading && randomQuiz && (
+            <div className="grid flex-1 gap-3 pb-4 md:grid-cols-2 md:items-stretch">
+              <div className="overflow-hidden rounded-2xl bg-card shadow-xl md:min-h-0">
+                {randomQuiz.imageUrl ? (
+                  <img
+                    src={randomQuiz.imageUrl}
+                    alt={randomQuiz.monument}
+                    className="h-64 w-full object-cover sm:h-80 md:h-full md:min-h-[460px]"
+                  />
+                ) : (
+                  <div className="flex h-64 items-center justify-center bg-accent/20 text-center sm:h-80 md:h-full md:min-h-[460px]">
+                    <div>
+                      <div className="text-4xl">?</div>
+                      <div className="mt-2 text-sm text-muted-foreground">No Wikimedia image found</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col rounded-2xl bg-card p-4 shadow-xl md:min-h-[460px]">
+                <div className="rounded-xl border-l-4 border-primary bg-primary/5 p-3">
+                  <div className="text-xs font-bold uppercase tracking-wide text-primary">
+                    {randomQuiz.country} · {randomQuiz.city}
+                  </div>
+                  <h2 className="mt-2 text-2xl font-black">AI generated challenge</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Photo from Wikimedia Commons. Question from Gemini.
+                  </p>
+                </div>
+
+                <div className="mt-4 rounded-2xl border-2 border-primary/25 bg-accent/10 p-4">
+                  <div className="text-xs font-bold uppercase tracking-wide text-primary">Question</div>
+                  <h3 className="mt-2 text-xl font-black">{randomQuiz.questionRu}</h3>
+                  <h4 className="mt-1 text-base font-semibold text-muted-foreground">{randomQuiz.questionEn}</h4>
+                </div>
+
+                <form onSubmit={submitRandomQuiz} className="mt-4 flex gap-2">
+                  <Input
+                    autoFocus
+                    value={randomAnswer}
+                    onChange={(e) => setRandomAnswer(e.target.value)}
+                    disabled={!!randomFeedback}
+                    placeholder="Answer in Russian or English..."
+                    className="h-12 text-base"
+                  />
+                  <Button type="submit" disabled={!randomAnswer.trim() || !!randomFeedback} className="h-12 px-5">
+                    Submit
+                  </Button>
+                </form>
+
+                {randomFeedback && (
+                  <div className={`mt-4 rounded-xl p-3 text-sm ${
+                    randomFeedback.kind === "correct" ? "bg-primary/15"
+                    : randomFeedback.kind === "close" ? "bg-accent/30" : "bg-destructive/15"
+                  }`}>
+                    <div className="font-bold">{randomFeedback.text}</div>
+                  </div>
+                )}
+
+                <div className="mt-auto pt-4">
+                  {randomQuiz.imageSourceUrl && (
+                    <a
+                      href={randomQuiz.imageSourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block truncate text-xs text-muted-foreground underline"
+                    >
+                      Wikimedia source: {randomQuiz.imageTitle || randomQuiz.imageSourceUrl}
+                    </a>
+                  )}
+                  <Button onClick={() => void loadRandomQuiz()} variant="secondary" className="mt-3 w-full rounded-full">
+                    Next random quiz
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -460,7 +676,7 @@ function Index() {
 
   // level screen
   return (
-    <div className="relative min-h-fit overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20 pb-6">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20">
       {/* Floating country symbols rising from the bottom of the screen */}
       <div className="pointer-events-none fixed inset-x-0 bottom-0 top-0 z-0 overflow-hidden">
         {Array.from({ length: 18 }).map((_, i) => {
@@ -480,7 +696,7 @@ function Index() {
           );
         })}
       </div>
-      <div className="relative z-10 mx-auto max-w-6xl px-4 py-3">
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-3">
         {/* HUD */}
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-full bg-card px-4 py-2 shadow text-sm">
           <div className="font-bold">Level {level.id} / {LEVELS.length}</div>
@@ -507,7 +723,7 @@ function Index() {
                   setQIdx(0);
                   setInput("");
                   setFeedback(null);
-                  setShowHint(false);
+                  resetQuestionHelpers();
                   void savePlayerState({ current_level_idx: i, current_question_idx: 0 });
                 }}
                 className={`flex h-9 w-9 items-center justify-center rounded-full border-2 text-base transition hover:scale-110 ${
@@ -534,7 +750,7 @@ function Index() {
                   setQIdx(i);
                   setInput("");
                   setFeedback(null);
-                  setShowHint(false);
+                  resetQuestionHelpers();
                   void savePlayerState({ current_question_idx: i });
                 }}
                 className={`flex h-9 min-w-9 items-center justify-center rounded-full border-2 px-3 text-sm font-bold transition hover:scale-110 ${
@@ -612,18 +828,18 @@ function Index() {
         )}
 
         {/* Two-column: image + question side-by-side on desktop */}
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="overflow-hidden rounded-2xl shadow-xl">
+        <div className="grid gap-3 pb-4 md:flex-1 md:grid-cols-2 md:items-stretch">
+          <div className="overflow-hidden rounded-2xl shadow-xl md:min-h-0">
             <img
               key={`img-${level.id}-${qIdx}`}
               src={level.images[qIdx] ?? level.images[0] ?? level.image}
               alt={`${level.monument} ${qIdx + 1}`}
               loading={qIdx === 0 ? "eager" : "lazy"}
-              className="h-44 w-full object-cover md:h-[300px] animate-pop-in"
+              className="h-56 w-full object-cover animate-pop-in sm:h-72 md:h-full md:min-h-[420px]"
             />
           </div>
 
-          <div className="relative rounded-2xl bg-card p-4 shadow-xl">
+          <div className="relative flex flex-col rounded-2xl bg-card p-4 shadow-xl md:min-h-[420px]">
             <div className="rounded-xl border-l-4 border-primary bg-accent/10 p-2">
               <div className="text-xs font-bold text-primary">{level.npc}</div>
               <p className="text-xs">{level.intro}</p>
@@ -664,6 +880,32 @@ function Index() {
               Submit
             </Button>
             </form>
+
+            <div className="mt-2 rounded-xl border border-primary/20 bg-primary/5 p-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <div className="text-xs font-bold text-primary">Gemini AI guide</div>
+                  <p className="text-[11px] text-muted-foreground">Smart hint without revealing the answer</p>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  onClick={askGeminiHint}
+                  disabled={aiHintLoading || !!feedback}
+                  className="h-9 rounded-full px-3 text-xs"
+                >
+                  {aiHintLoading ? "Thinking..." : "AI hint"}
+                </Button>
+              </div>
+              {(aiHint || aiHintError) && (
+                <div className={`mt-2 rounded-lg p-2 text-xs ${
+                  aiHintError ? "bg-destructive/10 text-destructive" : "bg-card/70 text-foreground"
+                }`}>
+                  {aiHintError || aiHint}
+                </div>
+              )}
+            </div>
 
             {/* Hint — floats above as overlay so the input never gets pushed off-screen */}
             <div className="relative mt-2">
