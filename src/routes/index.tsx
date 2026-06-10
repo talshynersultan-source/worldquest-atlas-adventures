@@ -676,17 +676,10 @@ function Index() {
         <img src={heroImg} alt="World landmarks collage" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background/90" />
         <div className="absolute right-4 top-4 z-30 flex max-w-[92vw] items-center gap-2 rounded-full bg-card/90 px-3 py-2 shadow">
-          <button
-            onClick={() => setShowProfile((value) => !value)}
-            className="flex min-w-0 items-center gap-2 text-left text-sm font-bold"
-            aria-label="Открыть профиль игрока"
-          >
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15">👤</span>
-            <span className="max-w-[180px] truncate">{displayName || user.email}</span>
-          </button>
+          <span className="max-w-[190px] truncate text-sm font-bold">👋 {user.email}</span>
           <button onClick={signOut} className="shrink-0 text-xs text-muted-foreground hover:text-foreground">Выйти</button>
         </div>
-        {showProfile && (
+        {false && showProfile && (
           <>
             <button
               className="fixed inset-0 z-20 bg-transparent"
@@ -798,15 +791,90 @@ function Index() {
               AI Random Quiz
             </Button>
           </div>
-          {completedLevels.size > 0 && (
-            <div className="mt-4 rounded-full bg-card/80 px-5 py-2 text-sm font-bold">
-              Progress: {completedLevels.size}/{LEVELS.length} stops · ⭐ {score} · 💸 {money}
+          <div className="mt-4 w-full max-w-xl rounded-2xl bg-card/85 p-3 text-left shadow-lg backdrop-blur">
+            <button
+              onClick={() => setShowProfile((value) => !value)}
+              className="flex w-full items-center justify-between gap-3 text-left"
+              aria-label="Открыть профиль игрока"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/15 text-2xl">👤</span>
+                <div className="min-w-0">
+                  <div className="truncate text-base font-black">Профиль игрока</div>
+                  <div className="truncate text-xs text-muted-foreground">{displayName || user.email}</div>
+                </div>
+              </div>
+              <span className="shrink-0 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold">
+                {showProfile ? "Скрыть" : "Открыть"}
+              </span>
+            </button>
+
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
+              <div className="rounded-xl bg-background/80 p-2">
+                <div className="text-muted-foreground">Progress</div>
+                <b>{completedLevels.size}/{LEVELS.length}</b>
+              </div>
+              <div className="rounded-xl bg-background/80 p-2">
+                <div className="text-muted-foreground">Score</div>
+                <b>{score}</b>
+              </div>
+              <div className="rounded-xl bg-background/80 p-2">
+                <div className="text-muted-foreground">Money</div>
+                <b>{money}</b>
+              </div>
+              <div className="rounded-xl bg-background/80 p-2">
+                <div className="text-muted-foreground">Best</div>
+                <b>{stats.best_score}</b>
+              </div>
+              <div className="rounded-xl bg-background/80 p-2">
+                <div className="text-muted-foreground">Верно</div>
+                <b>{stats.total_correct}</b>
+              </div>
+              <div className="rounded-xl bg-background/80 p-2">
+                <div className="text-muted-foreground">Ошибки</div>
+                <b>{stats.total_wrong}</b>
+              </div>
             </div>
-          )}
-          <div className="mt-3 flex flex-wrap justify-center gap-2 text-xs">
-            <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">🏆 Best: {stats.best_score}</span>
-            <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">✅ Правильных ответов: {stats.total_correct}</span>
-            <span className="rounded-full bg-card/80 px-3 py-1 font-semibold">❌ Неправильных ответов: {stats.total_wrong}</span>
+
+            {showProfile && (
+              <div className="mt-3 rounded-xl bg-background/75 p-3 text-xs ring-1 ring-border">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <h3 className="font-black">Ошибки для повторения ☀️</h3>
+                  {missedNotes.length > 0 && (
+                    <button onClick={clearMissedNotes} className="text-muted-foreground underline hover:text-foreground">
+                      очистить
+                    </button>
+                  )}
+                </div>
+                {missedNotes.length > 0 ? (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {missedNotes.slice(0, 4).map((entry) => {
+                      const note = noteTextRu(entry.monument, entry.city, entry.country, entry.explanation);
+                      return (
+                        <div key={`${entry.source}-${entry.country}-${entry.city}-${entry.monument}`} className="rounded-lg bg-card/90 p-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="truncate font-black">{note.monument}</div>
+                              <div className="truncate text-muted-foreground">{note.place}</div>
+                            </div>
+                            <a
+                              href={youtubeUrl(entry)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="shrink-0 rounded-full bg-red-500 px-2 py-1 font-bold text-white"
+                            >
+                              YouTube
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="rounded-lg bg-primary/10 p-2 text-center font-bold">Пока ошибок нет</div>
+                )}
+              </div>
+            )}
           </div>
           {completedLevels.size > 0 && (
             <button
