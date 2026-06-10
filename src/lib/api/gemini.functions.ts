@@ -318,14 +318,14 @@ function keywordTokens(text: string) {
     .replace(/file:/g, " ")
     .split(/[^a-zа-яё0-9]+/i)
     .map((token) => token.trim())
-    .filter((token) => token.length >= 4 && !["photo", "image", "photograph", "commons"].includes(token));
+    .filter((token) => token.length >= 3 && !["and", "the", "photo", "image", "photograph", "commons", "file"].includes(token));
 }
 
 function titleMatchesLandmark(title: string, landmark: string) {
   const titleTokens = keywordTokens(title);
   const landmarkTokens = keywordTokens(landmark);
   if (!landmarkTokens.length) return true;
-  return landmarkTokens.some((token) => titleTokens.includes(token));
+  return landmarkTokens.every((token) => titleTokens.includes(token));
 }
 
 function normalizeKey(value: string) {
@@ -423,7 +423,7 @@ function normalizeQuiz(raw: Partial<RandomQuiz>): RandomQuiz {
   };
 }
 
-async function getCommonsImage(searchQuery: string, landmark: string) {
+async function searchCommonsImage(searchQuery: string, landmark: string) {
   const apiUrl = new URL("https://commons.wikimedia.org/w/api.php");
   apiUrl.searchParams.set("action", "query");
   apiUrl.searchParams.set("format", "json");
@@ -444,8 +444,7 @@ async function getCommonsImage(searchQuery: string, landmark: string) {
     const info = page.imageinfo?.[0];
     return info?.mime?.startsWith("image/") && (info.thumburl || info.url);
   });
-  const matchingPages = pages.filter((page) => titleMatchesLandmark(page.title || "", landmark));
-  const pagePool = matchingPages.length ? matchingPages : [];
+  const pagePool = pages.filter((page) => titleMatchesLandmark(page.title || "", landmark));
   const page = pagePool[Math.floor(Math.random() * pagePool.length)];
   const info = page?.imageinfo?.[0];
 
@@ -456,6 +455,22 @@ async function getCommonsImage(searchQuery: string, landmark: string) {
     imageSourceUrl: info.descriptionurl || "https://commons.wikimedia.org",
     imageTitle: page.title || "Wikimedia Commons image",
   };
+}
+
+async function getCommonsImage(searchQuery: string, landmark: string) {
+  const queries = Array.from(new Set([
+    `${landmark} photograph`,
+    `"${landmark}" photograph`,
+    landmark,
+    searchQuery,
+  ].filter(Boolean)));
+
+  for (const query of queries) {
+    const image = await searchCommonsImage(query, landmark);
+    if (image) return image;
+  }
+
+  return null;
 }
 
 export const getGeminiHint = createServerFn({ method: "POST" })
