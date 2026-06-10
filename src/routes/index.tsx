@@ -673,7 +673,7 @@ function Index() {
 
   if (screen === "random") {
     return (
-      <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20 px-4 py-4">
+      <div className="relative h-screen overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20 px-3 py-2 sm:px-4">
         <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
           {Array.from({ length: 18 }).map((_, i) => {
             const stickers = randomQuiz?.stickers?.length ? randomQuiz.stickers : ["🌍", "🧭", "📍", "✨"];
@@ -694,8 +694,8 @@ function Index() {
             );
           })}
         </div>
-        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl flex-col">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-full bg-card px-4 py-2 shadow text-sm">
+        <div className="relative z-10 mx-auto flex h-full min-h-0 max-w-6xl flex-col">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-full bg-card px-3 py-1.5 text-xs shadow sm:text-sm">
             <button onClick={() => setScreen("home")} className="font-bold text-primary hover:underline">
               Назад
             </button>
@@ -730,11 +730,11 @@ function Index() {
           )}
 
           {!randomLoading && randomRoundAnswered >= 7 && (
-            <div className="flex flex-1 items-start justify-center rounded-2xl bg-card/90 p-3 shadow-xl md:items-center">
+            <div className="flex min-h-0 flex-1 items-start justify-center overflow-hidden rounded-2xl bg-card/90 p-2 shadow-xl md:items-center">
               <div className="w-full max-w-5xl">
-                <div className="rounded-2xl border-l-4 border-primary bg-primary/5 p-3 text-center">
-                  <div className="text-sm font-bold uppercase tracking-wide text-primary">Итог раунда</div>
-                  <h2 className="mt-1 text-3xl font-black">{randomRoundCorrect} / 7</h2>
+                <div className="rounded-2xl border-l-4 border-primary bg-primary/5 p-2 text-center">
+                  <div className="text-xs font-bold uppercase tracking-wide text-primary">Итог раунда</div>
+                  <h2 className="text-2xl font-black sm:text-3xl">{randomRoundCorrect} / 7</h2>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Правильных ответов за эти 7 вопросов
                   </p>
@@ -748,7 +748,7 @@ function Index() {
                     </span>
                   </div>
                   {randomRoundNotes.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+                    <div className="grid grid-cols-2 gap-1.5 md:grid-cols-3">
                       {randomRoundNotes.map((note) => (
                         <StudyNote
                           key={`${note.country}-${note.city}-${note.monument}`}
@@ -780,16 +780,16 @@ function Index() {
           )}
 
           {!randomLoading && randomRoundAnswered < 7 && randomQuiz && (
-            <div className="grid flex-1 gap-3 pb-4 md:grid-cols-2 md:items-stretch">
+            <div className="grid min-h-0 flex-1 gap-2 pb-1 md:grid-cols-2 md:items-stretch">
               <div className="overflow-hidden rounded-2xl bg-card shadow-xl md:min-h-0">
                 {randomQuiz.imageUrl ? (
                   <img
                     src={randomQuiz.imageUrl}
                     alt={randomQuiz.monument}
-                    className="h-52 w-full object-cover sm:h-64 md:h-full md:min-h-[360px]"
+                    className="h-36 w-full object-cover sm:h-44 md:h-full md:min-h-0"
                   />
                 ) : (
-                  <div className="flex h-52 items-center justify-center bg-accent/20 text-center sm:h-64 md:h-full md:min-h-[360px]">
+                  <div className="flex h-36 items-center justify-center bg-accent/20 text-center sm:h-44 md:h-full md:min-h-0">
                     <div>
                       <div className="text-4xl">?</div>
                       <div className="mt-2 text-sm text-muted-foreground">Фото в Wikimedia не найдено</div>
@@ -798,24 +798,24 @@ function Index() {
                 )}
               </div>
 
-              <div className="flex flex-col rounded-2xl bg-card p-4 shadow-xl md:min-h-[360px]">
-                <div className="rounded-xl border-l-4 border-primary bg-primary/5 p-3">
+              <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl bg-card p-3 shadow-xl md:min-h-0">
+                <div className="rounded-xl border-l-4 border-primary bg-primary/5 p-2">
                   <div className="text-xs font-bold uppercase tracking-wide text-primary">
                     {randomQuiz.country} · {randomQuiz.city}
                   </div>
-                  <h2 className="mt-2 text-2xl font-black">Случайный вопрос от AI</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <h2 className="mt-1 text-xl font-black">Случайный вопрос от AI</h2>
+                  <p className="text-xs text-muted-foreground">
                     Фото из Wikimedia Commons. Вопрос от Gemini.
                   </p>
                 </div>
 
-                <div className="mt-4 rounded-2xl border-2 border-primary/25 bg-accent/10 p-4">
+                <div className="mt-2 rounded-2xl border-2 border-primary/25 bg-accent/10 p-3">
                   <div className="text-xs font-bold uppercase tracking-wide text-primary">Вопрос</div>
-                  <h3 className="mt-2 text-xl font-black">{randomQuiz.questionRu}</h3>
-                  <p className="mt-1 text-sm font-semibold text-muted-foreground">Отвечай на русском или английском.</p>
+                  <h3 className="mt-1 text-lg font-black">{randomQuiz.questionRu}</h3>
+                  <p className="text-xs font-semibold text-muted-foreground">Отвечай на русском или английском.</p>
                 </div>
 
-                <div className="mt-3 rounded-xl bg-secondary/20 p-3">
+                <div className="mt-2 rounded-xl bg-secondary/20 p-2">
                   <button
                     type="button"
                     onClick={() => setRandomHintVisible((value) => !value)}
@@ -826,27 +826,32 @@ function Index() {
                   {randomHintVisible && (() => {
                     const hint = hintFor(randomQuiz.acceptedAnswers);
                     return (
-                      <div className="relative mt-2 overflow-hidden rounded-lg bg-primary/10 p-3 text-sm">
+                      <div className="relative mt-1 overflow-hidden rounded-lg bg-primary/10 p-2 text-xs">
                         <div className="pointer-events-none absolute right-2 top-1 flex gap-1 text-xl opacity-70">
                           <span>🎆</span>
                           <span>🎇</span>
                           <span>✨</span>
                         </div>
                         <div className="font-bold text-primary">Визуальная подсказка</div>
-                        <p className="mt-1 pr-16 font-medium text-foreground/80">{randomQuiz.hint}</p>
-                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        <p
+                          className="mt-1 overflow-hidden pr-16 font-medium text-foreground/80"
+                          style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
+                        >
+                          {randomQuiz.hint}
+                        </p>
+                        <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
                           {hint.ru.letters > 0 && (
                             <div className="rounded-lg bg-card/70 p-2">
                               <div className="text-[11px] font-semibold text-muted-foreground">На русском</div>
                               <div>Букв: <b>{hint.ru.letters}</b></div>
-                              <div className="font-mono text-base font-bold tracking-widest text-primary">{hint.ru.masked}</div>
+                              <div className="font-mono text-sm font-bold tracking-widest text-primary">{hint.ru.masked}</div>
                             </div>
                           )}
                           {hint.en.letters > 0 && (
                             <div className="rounded-lg bg-card/70 p-2">
                               <div className="text-[11px] font-semibold text-muted-foreground">In English</div>
                               <div>Letters: <b>{hint.en.letters}</b></div>
-                              <div className="font-mono text-base font-bold tracking-widest text-primary">{hint.en.masked}</div>
+                              <div className="font-mono text-sm font-bold tracking-widest text-primary">{hint.en.masked}</div>
                             </div>
                           )}
                         </div>
@@ -856,39 +861,45 @@ function Index() {
                 </div>
 
                 {!randomFeedback ? (
-                  <form onSubmit={submitRandomQuiz} className="mt-4 flex gap-2">
+                  <form onSubmit={submitRandomQuiz} className="mt-2 flex gap-2">
                     <Input
                       autoFocus
                       value={randomAnswer}
                       onChange={(e) => setRandomAnswer(e.target.value)}
                       placeholder="Ответ на русском или English..."
-                      className="h-12 text-base"
+                      className="h-10 text-sm"
                     />
-                    <Button type="submit" disabled={!randomAnswer.trim()} className="h-12 px-5">
+                    <Button type="submit" disabled={!randomAnswer.trim()} className="h-10 px-4">
                       Ответить
                     </Button>
                   </form>
                 ) : (
-                  <div className={`mt-4 rounded-xl p-3 text-sm ${
+                  <div className={`mt-2 rounded-xl p-2 text-xs ${
                     randomFeedback.kind === "correct" ? "bg-primary/15"
                     : randomFeedback.kind === "close" ? "bg-accent/30" : "bg-destructive/15"
                   }`}>
-                    <div className="font-bold">{randomFeedback.text}</div>
+                    <div
+                      className="overflow-hidden font-bold"
+                      style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
+                    >
+                      {randomFeedback.text}
+                    </div>
                     {randomFeedback.kind !== "correct" && (
                       <StudyNote
                         monument={randomQuiz.monument}
                         city={randomQuiz.city}
                         country={randomQuiz.country}
                         explanation={randomQuiz.explanation}
+                        compact
                       />
                     )}
-                    <Button onClick={() => void loadRandomQuiz()} size="sm" className="mt-3 rounded-full">
+                    <Button onClick={() => void loadRandomQuiz()} size="sm" className="mt-2 rounded-full">
                       Следующий вопрос
                     </Button>
                   </div>
                 )}
 
-                <div className="mt-auto pt-4">
+                <div className="mt-auto pt-2">
                   {randomQuiz.imageSourceUrl && (
                     <a
                       href={randomQuiz.imageSourceUrl}
@@ -910,22 +921,22 @@ function Index() {
 
   if (screen === "end") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-accent/40 via-background to-secondary/30 px-6 py-20">
-        <div className="mx-auto max-w-2xl rounded-3xl border-2 border-primary/20 bg-card p-10 text-center shadow-2xl">
-          <div className="text-6xl">🏁</div>
-          <h2 className="mt-4 text-4xl font-black">Journey Complete!</h2>
-          <div className="mt-8 grid grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-accent/30 p-6">
+      <div className="flex h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-accent/40 via-background to-secondary/30 px-4 py-3">
+        <div className="mx-auto w-full max-w-2xl rounded-3xl border-2 border-primary/20 bg-card p-5 text-center shadow-2xl sm:p-7">
+          <div className="text-4xl sm:text-5xl">🏁</div>
+          <h2 className="mt-2 text-3xl font-black sm:text-4xl">Journey Complete!</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-accent/30 p-4">
               <div className="text-sm uppercase tracking-wide">Score</div>
-              <div className="text-4xl font-black">{score} ⭐</div>
+              <div className="text-3xl font-black">{score} ⭐</div>
             </div>
-            <div className="rounded-2xl bg-secondary/30 p-6">
+            <div className="rounded-2xl bg-secondary/30 p-4">
               <div className="text-sm uppercase tracking-wide">Money</div>
-              <div className="text-4xl font-black">{money} 💸</div>
+              <div className="text-3xl font-black">{money} 💸</div>
             </div>
           </div>
-          <div className="mt-8 text-2xl font-bold">{rankFor(score)}</div>
-          <Button onClick={() => setScreen("home")} className="mt-8 h-12 rounded-full px-8 text-lg">
+          <div className="mt-4 text-xl font-bold">{rankFor(score)}</div>
+          <Button onClick={() => setScreen("home")} className="mt-5 h-11 rounded-full px-8 text-base">
             Travel again
           </Button>
         </div>
@@ -936,12 +947,12 @@ function Index() {
   if (screen === "summary") {
     const allRight = levelCorrect === 3;
     return (
-      <div className="min-h-screen bg-gradient-to-br from-secondary/30 to-accent/30 px-4 py-10">
-        <div className="mx-auto max-w-2xl rounded-3xl bg-card p-8 shadow-xl">
-          <div className="text-center text-5xl">{level.flag}</div>
-          <h2 className="mt-2 text-center text-3xl font-black">{level.monument}</h2>
-          <p className="text-center text-muted-foreground">{level.city}, {level.country}</p>
-          <div className="relative mt-6 rounded-2xl bg-accent/20 p-4">
+      <div className="flex h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-secondary/30 to-accent/30 px-4 py-3">
+        <div className="mx-auto w-full max-w-2xl rounded-3xl bg-card p-4 shadow-xl sm:p-6">
+          <div className="text-center text-4xl">{level.flag}</div>
+          <h2 className="mt-1 text-center text-2xl font-black sm:text-3xl">{level.monument}</h2>
+          <p className="text-center text-sm text-muted-foreground">{level.city}, {level.country}</p>
+          <div className="relative mt-3 rounded-2xl bg-accent/20 p-3 text-sm">
             <span className="absolute -top-4 -left-3 text-4xl rotate-[-15deg] animate-bob">{level.symbols[0]}</span>
             <span className="absolute -top-5 -right-2 text-4xl rotate-[12deg] animate-sparkle">✨</span>
             <span className="absolute -bottom-4 -right-3 text-4xl rotate-[10deg] animate-bob">{level.symbols[1] ?? "🎉"}</span>
@@ -949,15 +960,15 @@ function Index() {
             <div className="text-sm font-bold uppercase tracking-wide text-foreground/70">🎓 Fun Fact</div>
             <p className="mt-1">{level.fact}</p>
           </div>
-          <div className="mt-4 rounded-2xl bg-secondary/20 p-4">
+          <div className="mt-3 rounded-2xl bg-secondary/20 p-3 text-sm">
             <div className="text-sm font-bold uppercase tracking-wide text-foreground/70">📚 Vocabulary</div>
             <p className="mt-1 font-medium">{level.vocab.join(" · ")}</p>
           </div>
-          <div className="mt-4 text-center">
-            <div className="text-lg">You got <b>{levelCorrect}/3</b> correct.</div>
+          <div className="mt-3 text-center">
+            <div className="text-base">You got <b>{levelCorrect}/3</b> correct.</div>
             {allRight && <div className="mt-1 font-bold text-primary">🎉 Level bonus: +20 points · +10 💸</div>}
           </div>
-          <Button onClick={goNextLevel} className="mt-6 h-12 w-full rounded-full text-lg">
+          <Button onClick={goNextLevel} className="mt-4 h-11 w-full rounded-full text-base">
             {levelIdx + 1 >= LEVELS.length ? "Finish journey 🏁" : "Travel to next stop ✈️"}
           </Button>
         </div>
@@ -967,7 +978,7 @@ function Index() {
 
   // level screen
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20">
+    <div className="relative h-screen overflow-hidden bg-gradient-to-br from-secondary/20 via-background to-accent/20">
       {/* Floating country symbols rising from the bottom of the screen */}
       <div className="pointer-events-none fixed inset-x-0 bottom-0 top-0 z-0 overflow-hidden">
         {Array.from({ length: 18 }).map((_, i) => {
@@ -987,9 +998,9 @@ function Index() {
           );
         })}
       </div>
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-3">
+      <div className="relative z-10 mx-auto flex h-full min-h-0 max-w-6xl flex-col px-3 py-2 sm:px-4">
         {/* HUD */}
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-full bg-card px-4 py-2 shadow text-sm">
+        <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2 rounded-full bg-card px-3 py-1.5 text-xs shadow sm:text-sm">
           <div className="flex items-center gap-3">
             <button onClick={() => setScreen("home")} className="font-bold text-primary hover:underline">
               Назад
@@ -1004,7 +1015,7 @@ function Index() {
         </div>
 
         {/* Always-visible level switcher — click to jump to any level */}
-        <div className="mb-2 flex flex-wrap items-center justify-center gap-1.5 rounded-2xl bg-card/70 px-3 py-2 shadow-sm">
+        <div className="mb-1.5 flex flex-wrap items-center justify-center gap-1 rounded-2xl bg-card/70 px-2 py-1.5 shadow-sm">
           {LEVELS.map((l, i) => {
             const done = completedLevels.has(l.id);
             const current = i === levelIdx;
@@ -1022,7 +1033,7 @@ function Index() {
                   resetQuestionHelpers();
                   void savePlayerState({ current_level_idx: i, current_question_idx: 0 });
                 }}
-                className={`flex h-9 w-9 items-center justify-center rounded-full border-2 text-base transition hover:scale-110 ${
+                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm transition hover:scale-110 ${
                   current ? "border-primary bg-primary/15 scale-110" :
                   done ? "border-accent bg-accent/20" : "border-muted bg-card opacity-70 hover:opacity-100"
                 }`}
@@ -1034,7 +1045,7 @@ function Index() {
         </div>
 
         {/* Question switcher — click to jump to any question of the current level */}
-        <div className="mb-3 flex items-center justify-center gap-2">
+        <div className="mb-2 flex items-center justify-center gap-2">
           {[0, 1, 2].map((i) => {
             const current = i === qIdx;
             return (
@@ -1049,7 +1060,7 @@ function Index() {
                   resetQuestionHelpers();
                   void savePlayerState({ current_question_idx: i });
                 }}
-                className={`flex h-9 min-w-9 items-center justify-center rounded-full border-2 px-3 text-sm font-bold transition hover:scale-110 ${
+                className={`flex h-8 min-w-8 items-center justify-center rounded-full border-2 px-2.5 text-sm font-bold transition hover:scale-110 ${
                   current
                     ? "border-primary bg-primary text-primary-foreground scale-110"
                     : "border-muted bg-card text-foreground opacity-80 hover:opacity-100"
@@ -1124,66 +1135,71 @@ function Index() {
         )}
 
         {/* Two-column: image + question side-by-side on desktop */}
-        <div className="grid gap-3 pb-4 md:flex-1 md:grid-cols-2 md:items-stretch">
+        <div className="grid min-h-0 gap-2 pb-1 md:flex-1 md:grid-cols-2 md:items-stretch">
           <div className="overflow-hidden rounded-2xl shadow-xl md:min-h-0">
             <img
               key={`img-${level.id}-${qIdx}`}
               src={level.images[qIdx] ?? level.images[0] ?? level.image}
               alt={`${level.monument} ${qIdx + 1}`}
               loading={qIdx === 0 ? "eager" : "lazy"}
-              className="h-56 w-full object-cover animate-pop-in sm:h-72 md:h-full md:min-h-[420px]"
+              className="h-36 w-full object-cover animate-pop-in sm:h-44 md:h-full md:min-h-0"
             />
           </div>
 
-          <div className="relative flex flex-col rounded-2xl bg-card p-4 shadow-xl md:min-h-[420px]">
+          <div className="relative flex min-h-0 flex-col overflow-visible rounded-2xl bg-card p-3 shadow-xl md:min-h-0">
             <div className="rounded-xl border-l-4 border-primary bg-accent/10 p-2">
               <div className="text-xs font-bold text-primary">{level.npc}</div>
               <p className="text-xs">{level.intro}</p>
             </div>
 
-            <div className="mt-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            <div className="mt-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Question {qIdx + 1} of 3
             </div>
-            <div className="mt-1 flex items-start gap-3">
+            <div className="mt-1 flex items-start gap-2">
               <img
                 src={level.avatar}
                 alt={level.npc}
                 loading="lazy"
                 width={72}
                 height={72}
-                className="h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-full border-2 border-primary bg-card object-cover shadow-md animate-bob"
+                className="h-14 w-14 shrink-0 rounded-full border-2 border-primary bg-card object-cover shadow-md animate-bob md:h-16 md:w-16"
               />
-              <div className="relative flex-1 rounded-2xl border-2 border-primary/30 bg-accent/15 p-3">
+              <div className="relative flex-1 rounded-2xl border-2 border-primary/30 bg-accent/15 p-2.5">
                 <div className="absolute -left-2 top-5 h-4 w-4 rotate-45 border-b-2 border-l-2 border-primary/30 bg-accent/15" />
                 <div className="text-[11px] font-bold uppercase tracking-wide text-primary">
                   {level.flag} Спрашивает житель {level.city}
                 </div>
-                <h3 className="mt-1 text-lg font-black md:text-xl">🇷🇺 {question.qRu}</h3>
-                <h4 className="mt-0.5 text-sm font-semibold text-muted-foreground md:text-base">🇬🇧 {question.q}</h4>
+                <h3 className="mt-1 text-base font-black md:text-lg">🇷🇺 {question.qRu}</h3>
+                <h4 className="mt-0.5 text-xs font-semibold text-muted-foreground md:text-sm">🇬🇧 {question.q}</h4>
               </div>
             </div>
 
-            <form onSubmit={submit} className={`mt-3 gap-2 ${feedback ? "hidden" : "flex"}`}>
+            <form onSubmit={submit} className={`mt-2 gap-2 ${feedback ? "hidden" : "flex"}`}>
             <Input
               autoFocus
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="✍️ Ответ (на русском или English)..."
               disabled={!!feedback}
-              className="h-12 text-base border-2 border-primary/40 focus-visible:border-primary"
+              className="h-10 text-sm border-2 border-primary/40 focus-visible:border-primary"
             />
-            <Button type="submit" disabled={!!feedback || !input.trim()} className="h-12 px-5">
+            <Button type="submit" disabled={!!feedback || !input.trim()} className="h-10 px-4">
               Submit
             </Button>
             </form>
 
             {feedback && (
-            <div className={`mt-3 rounded-xl p-3 ${
+            <div className={`mt-2 rounded-xl p-2 text-xs ${
               feedback.kind === "correct" ? "bg-primary/15"
               : feedback.kind === "close" ? "bg-accent/30" : "bg-destructive/15"
             }`}>
-              <div className="text-base font-bold">{feedback.msg}</div>
-              <div className="text-xs">{feedback.explain}</div>
+              <div className="text-sm font-bold">{feedback.msg}</div>
+              <div
+                className="overflow-hidden text-xs"
+                style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical" }}
+              >
+                {feedback.explain}
+              </div>
               {feedback.gain > 0 && (
                 <div className="mt-1 text-xs font-bold">
                   Вы получили +{feedback.gain} очков ⭐ · +{Math.floor(feedback.gain / 2)} 💸
@@ -1198,6 +1214,7 @@ function Index() {
                   city={level.city}
                   country={level.country}
                   explanation={question.explain || level.fact}
+                  compact
                 />
               )}
               <Button onClick={next} className="mt-2 rounded-full" size="sm">
