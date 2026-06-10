@@ -153,6 +153,110 @@ function hintFor(answers: string[]) {
   return { ru: maskOne(ru), en: maskOne(en) };
 }
 
+function noteTextRu(monument: string, city: string, country: string, explanation: string) {
+  const key = monument.toLowerCase();
+  const monumentMap: Record<string, string> = {
+    "big ben": "Биг-Бен",
+    "burj khalifa": "Бурдж-Халифа",
+    "christ the redeemer": "Христос-Искупитель",
+    colosseum: "Колизей",
+    "eiffel tower": "Эйфелева башня",
+    "el castillo": "Эль-Кастильо",
+    "fushimi inari shrine": "Фусими Инари",
+    "great sphinx of giza": "Великий сфинкс Гизы",
+    "great wall of china": "Великая Китайская стена",
+    "hagia sophia": "Айя-София",
+    "khan shatyr": "Хан Шатыр",
+    "machu picchu": "Мачу-Пикчу",
+    "neuschwanstein castle": "замок Нойшванштайн",
+    parthenon: "Парфенон",
+    "sagrada familia": "Саграда Фамилия",
+    "statue of liberty": "Статуя Свободы",
+    "sydney opera house": "Сиднейский оперный театр",
+    "taj mahal": "Тадж-Махал",
+    "tower bridge": "Тауэрский мост",
+  };
+  const countryMap: Record<string, string> = {
+    australia: "Австралия",
+    brazil: "Бразилия",
+    china: "Китай",
+    egypt: "Египет",
+    france: "Франция",
+    germany: "Германия",
+    greece: "Греция",
+    india: "Индия",
+    italy: "Италия",
+    japan: "Япония",
+    kazakhstan: "Казахстан",
+    mexico: "Мексика",
+    peru: "Перу",
+    spain: "Испания",
+    turkey: "Турция",
+    "united arab emirates": "ОАЭ",
+    "united kingdom": "Великобритания",
+    "united states": "США",
+  };
+  const cityMap: Record<string, string> = {
+    agra: "Агра",
+    astana: "Астана",
+    athens: "Афины",
+    barcelona: "Барселона",
+    bavaria: "Бавария",
+    beijing: "Пекин",
+    "chichen itza": "Чичен-Ица",
+    dubai: "Дубай",
+    giza: "Гиза",
+    istanbul: "Стамбул",
+    kyoto: "Киото",
+    london: "Лондон",
+    "new york": "Нью-Йорк",
+    paris: "Париж",
+    "rio de janeiro": "Рио-де-Жанейро",
+    rome: "Рим",
+    sydney: "Сидней",
+  };
+  const explanationMap: Record<string, string> = {
+    "big ben": "знаменитая часовая башня Лондона.",
+    "burj khalifa": "самый высокий небоскреб в мире.",
+    "christ the redeemer": "огромная статуя с раскрытыми руками над Рио-де-Жанейро.",
+    colosseum: "древний амфитеатр, где проходили зрелища.",
+    "eiffel tower": "железная башня и главный символ Парижа.",
+    "el castillo": "ступенчатая пирамида майя в Чичен-Ице.",
+    "fushimi inari shrine": "храм с длинной дорожкой из красных ворот тории.",
+    "great sphinx of giza": "каменная фигура льва с человеческой головой рядом с пирамидами.",
+    "great wall of china": "очень длинная стена, идущая по горам Китая.",
+    "hagia sophia": "древний храм-музей с большим куполом в Стамбуле.",
+    "khan shatyr": "здание-шатер в Астане.",
+    "machu picchu": "древний город инков высоко в горах Перу.",
+    "neuschwanstein castle": "сказочный замок в Баварии.",
+    parthenon: "древний храм на Акрополе в Афинах.",
+    "sagrada familia": "необычный храм Гауди в Барселоне.",
+    "statue of liberty": "статуя с факелом, символ свободы в Нью-Йорке.",
+    "sydney opera house": "театр у воды с крышей, похожей на паруса.",
+    "taj mahal": "беломраморный мавзолей в Агре.",
+    "tower bridge": "разводной мост с двумя башнями в Лондоне.",
+  };
+  const hasRussianExplanation = /[а-яё]/i.test(explanation);
+  return {
+    monument: monumentMap[key] ?? monument,
+    place: `${cityMap[city.toLowerCase()] ?? city}, ${countryMap[country.toLowerCase()] ?? country}`,
+    explanation: explanationMap[key] ?? (hasRussianExplanation ? explanation : "это известная достопримечательность, которую стоит запомнить по форме и месту."),
+  };
+}
+
+function feedbackExplainRu(monument: string, fallback: string) {
+  const answerMap: Record<string, string> = {
+    "Eiffel Tower": "Это Эйфелева башня.",
+    "Big Ben": "Это Биг-Бен.",
+    "Great Wall of China": "Это Великая Китайская стена.",
+    "Statue of Liberty": "Это Статуя Свободы.",
+    Colosseum: "Это Колизей.",
+    "Burj Khalifa": "Это Бурдж-Халифа.",
+    "Christ the Redeemer": "Это Христос-Искупитель.",
+  };
+  return answerMap[monument] ?? (/^[\x00-\x7F]*$/.test(fallback) ? "Это правильное название достопримечательности." : fallback);
+}
+
 function StudyNote({
   monument,
   city,
@@ -164,6 +268,8 @@ function StudyNote({
   country: string;
   explanation: string;
 }) {
+  const note = noteTextRu(monument, city, country, explanation);
+
   return (
     <div
       className="mt-3 rounded-xl border-2 border-primary/20 p-4 text-sm text-foreground shadow-sm"
@@ -179,9 +285,9 @@ function StudyNote({
         <div className="text-3xl drop-shadow-sm">☀️</div>
       </div>
       <div className="space-y-1 leading-6">
-        <p><b>Слово:</b> {monument}</p>
-        <p><b>Откуда:</b> {city}, {country}</p>
-        <p><b>Чем популярно:</b> {explanation}</p>
+        <p><b>Название:</b> {note.monument}</p>
+        <p><b>Место:</b> {note.place}</p>
+        <p><b>Почему запомнить:</b> {note.explanation}</p>
       </div>
     </div>
   );
@@ -421,16 +527,16 @@ function Index() {
     let newLevelCorrect = levelCorrect;
     let newTotalCorrect = stats.total_correct;
     let newTotalWrong = stats.total_wrong;
-    if (res === "correct") { gain = 10; msg = "Correct! ✅"; newLevelCorrect = levelCorrect + 1; setLevelCorrect(newLevelCorrect); newTotalCorrect += 1; }
-    else if (res === "close") { gain = 5; msg = "So close! 🤏"; newTotalCorrect += 1; }
-    else { gain = 0; msg = "Not quite. ❌"; newTotalWrong += 1; }
+    if (res === "correct") { gain = 10; msg = "Правильно! ✅"; newLevelCorrect = levelCorrect + 1; setLevelCorrect(newLevelCorrect); newTotalCorrect += 1; }
+    else if (res === "close") { gain = 5; msg = "Почти правильно! 🤏"; newTotalCorrect += 1; }
+    else { gain = 0; msg = "Не совсем. ❌"; newTotalWrong += 1; }
     const newScore = score + gain;
     const newMoney = money + Math.floor(gain / 2);
     const newBest = Math.max(stats.best_score, newScore);
     setScore(newScore);
     setMoney(newMoney);
     setStats((s) => ({ ...s, total_correct: newTotalCorrect, total_wrong: newTotalWrong, best_score: newBest }));
-    setFeedback({ kind: res, msg, explain: question.explain, gain });
+    setFeedback({ kind: res, msg, explain: feedbackExplainRu(level.monument, question.explain), gain });
     if (res === "correct") {
       setConfetti(true);
       window.setTimeout(() => setConfetti(false), 1400);
@@ -739,16 +845,36 @@ function Index() {
                   >
                     {randomHintVisible ? "Скрыть подсказку" : "Показать подсказку"}
                   </button>
-                  {randomHintVisible && (
-                    <div className="relative mt-2 overflow-hidden rounded-lg bg-primary/10 p-3">
-                      <div className="pointer-events-none absolute right-2 top-1 flex gap-1 text-xl opacity-70">
-                        <span>🎆</span>
-                        <span>🎇</span>
-                        <span>✨</span>
+                  {randomHintVisible && (() => {
+                    const hint = hintFor(randomQuiz.acceptedAnswers);
+                    return (
+                      <div className="relative mt-2 overflow-hidden rounded-lg bg-primary/10 p-3 text-sm">
+                        <div className="pointer-events-none absolute right-2 top-1 flex gap-1 text-xl opacity-70">
+                          <span>🎆</span>
+                          <span>🎇</span>
+                          <span>✨</span>
+                        </div>
+                        <div className="font-bold text-primary">Визуальная подсказка</div>
+                        <p className="mt-1 pr-16 font-medium text-foreground/80">{randomQuiz.hint}</p>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          {hint.ru.letters > 0 && (
+                            <div className="rounded-lg bg-card/70 p-2">
+                              <div className="text-[11px] font-semibold text-muted-foreground">На русском</div>
+                              <div>Букв: <b>{hint.ru.letters}</b></div>
+                              <div className="font-mono text-base font-bold tracking-widest text-primary">{hint.ru.masked}</div>
+                            </div>
+                          )}
+                          {hint.en.letters > 0 && (
+                            <div className="rounded-lg bg-card/70 p-2">
+                              <div className="text-[11px] font-semibold text-muted-foreground">In English</div>
+                              <div>Letters: <b>{hint.en.letters}</b></div>
+                              <div className="font-mono text-base font-bold tracking-widest text-primary">{hint.en.masked}</div>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <p className="pr-16 text-sm font-medium text-foreground/80">{randomQuiz.hint}</p>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
 
                 {!randomFeedback ? (
@@ -1105,8 +1231,8 @@ function Index() {
             <div className="mt-2 rounded-xl border border-primary/20 bg-primary/5 p-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <div className="text-xs font-bold text-primary">Gemini AI guide</div>
-                  <p className="text-[11px] text-muted-foreground">Smart hint without revealing the answer</p>
+                  <div className="text-xs font-bold text-primary">Gemini-подсказка</div>
+                  <p className="text-[11px] text-muted-foreground">Умная подсказка без прямого ответа</p>
                 </div>
                 <Button
                   type="button"
@@ -1116,7 +1242,7 @@ function Index() {
                   disabled={aiHintLoading || !!feedback}
                   className="h-9 rounded-full px-3 text-xs"
                 >
-                  {aiHintLoading ? "Thinking..." : "AI hint"}
+                  {aiHintLoading ? "Думаю..." : "AI подсказка"}
                 </Button>
               </div>
               {(aiHint || aiHintError) && (
