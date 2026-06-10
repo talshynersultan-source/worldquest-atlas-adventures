@@ -668,21 +668,20 @@ function Index() {
                   )}
                 </div>
 
-                <form onSubmit={submitRandomQuiz} className="mt-4 flex gap-2">
-                  <Input
-                    autoFocus
-                    value={randomAnswer}
-                    onChange={(e) => setRandomAnswer(e.target.value)}
-                    disabled={!!randomFeedback}
-                    placeholder="Ответ на русском или English..."
-                    className="h-12 text-base"
-                  />
-                  <Button type="submit" disabled={!randomAnswer.trim() || !!randomFeedback} className="h-12 px-5">
-                    Ответить
-                  </Button>
-                </form>
-
-                {randomFeedback && (
+                {!randomFeedback ? (
+                  <form onSubmit={submitRandomQuiz} className="mt-4 flex gap-2">
+                    <Input
+                      autoFocus
+                      value={randomAnswer}
+                      onChange={(e) => setRandomAnswer(e.target.value)}
+                      placeholder="Ответ на русском или English..."
+                      className="h-12 text-base"
+                    />
+                    <Button type="submit" disabled={!randomAnswer.trim()} className="h-12 px-5">
+                      Ответить
+                    </Button>
+                  </form>
+                ) : (
                   <div className={`mt-4 rounded-xl p-3 text-sm ${
                     randomFeedback.kind === "correct" ? "bg-primary/15"
                     : randomFeedback.kind === "close" ? "bg-accent/30" : "bg-destructive/15"
@@ -977,7 +976,7 @@ function Index() {
               </div>
             </div>
 
-            <form onSubmit={submit} className="mt-3 flex gap-2">
+            <form onSubmit={submit} className={`mt-3 gap-2 ${feedback ? "hidden" : "flex"}`}>
             <Input
               autoFocus
               value={input}
@@ -990,6 +989,35 @@ function Index() {
               Submit
             </Button>
             </form>
+
+            {feedback && (
+            <div className={`mt-3 rounded-xl p-3 ${
+              feedback.kind === "correct" ? "bg-primary/15"
+              : feedback.kind === "close" ? "bg-accent/30" : "bg-destructive/15"
+            }`}>
+              <div className="text-base font-bold">{feedback.msg}</div>
+              <div className="text-xs">{feedback.explain}</div>
+              {feedback.gain > 0 && (
+                <div className="mt-1 text-xs font-bold">
+                  Вы получили +{feedback.gain} очков ⭐ · +{Math.floor(feedback.gain / 2)} 💸
+                </div>
+              )}
+              <div className="mt-1 text-xs text-muted-foreground">
+                Всего правильных: <b>{stats.total_correct}</b> · Неправильных: <b>{stats.total_wrong}</b>
+              </div>
+              {feedback.kind !== "correct" && (
+                <StudyNote
+                  monument={level.monument}
+                  city={level.city}
+                  country={level.country}
+                  explanation={question.explain || level.fact}
+                />
+              )}
+              <Button onClick={next} className="mt-2 rounded-full" size="sm">
+                {qIdx < 2 ? "✈️ Следующий вопрос →" : "Посмотреть результаты →"}
+              </Button>
+            </div>
+            )}
 
             <div className="mt-2 rounded-xl border border-primary/20 bg-primary/5 p-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1108,7 +1136,7 @@ function Index() {
             })()}
             </div>
 
-            {feedback && (
+            {false && feedback && (
             <div className={`mt-3 rounded-xl p-3 ${
               feedback.kind === "correct" ? "bg-primary/15"
               : feedback.kind === "close" ? "bg-accent/30" : "bg-destructive/15"
