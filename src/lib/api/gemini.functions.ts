@@ -49,6 +49,14 @@ type CommonsPage = {
   }>;
 };
 
+type WikipediaPage = {
+  title?: string;
+  fullurl?: string;
+  thumbnail?: {
+    source?: string;
+  };
+};
+
 const fallbackQuizzes: RandomQuiz[] = [
   {
     country: "Japan",
@@ -328,6 +336,40 @@ function titleMatchesLandmark(title: string, landmark: string) {
   return landmarkTokens.every((token) => titleTokens.includes(token));
 }
 
+function normalizedTitle(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/^file:/, "")
+    .replace(/\.[a-z0-9]+$/i, "")
+    .replace(/[_-]+/g, " ")
+    .replace(/[^a-zа-яё0-9]+/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function commonsImageScore(title: string, landmark: string) {
+  if (!titleMatchesLandmark(title, landmark)) return -1;
+
+  const cleanTitle = normalizedTitle(title);
+  const cleanLandmark = normalizedTitle(landmark);
+  const titleTokens = keywordTokens(title);
+  const landmarkTokens = keywordTokens(landmark);
+  const noisyTokens = [
+    "aerial", "background", "boat", "boats", "crowd", "detail", "from", "inside", "interior",
+    "logo", "map", "near", "night", "panorama", "people", "plaque", "sign", "skyline",
+    "souvenir", "street", "view",
+  ];
+
+  let score = 10;
+  if (cleanTitle === cleanLandmark) score += 120;
+  if (cleanTitle.startsWith(cleanLandmark)) score += 80;
+  if (cleanTitle.includes(cleanLandmark)) score += 55;
+  score += landmarkTokens.filter((token) => titleTokens.includes(token)).length * 8;
+  score -= noisyTokens.filter((token) => titleTokens.includes(token)).length * 12;
+
+  return score;
+}
+
 function normalizeKey(value: string) {
   return value.toLowerCase().replace(/\s+/g, " ").trim();
 }
@@ -444,8 +486,12 @@ async function searchCommonsImage(searchQuery: string, landmark: string) {
     const info = page.imageinfo?.[0];
     return info?.mime?.startsWith("image/") && (info.thumburl || info.url);
   });
-  const pagePool = pages.filter((page) => titleMatchesLandmark(page.title || "", landmark));
-  const page = pagePool[Math.floor(Math.random() * pagePool.length)];
+  const pagePool = pages
+    .map((page) => ({ page, score: commonsImageScore(page.title || "", landmark) }))
+    .filter((item) => item.score >= 25)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4);
+  const page = pagePool[Math.floor(Math.random() * pagePool.length)]?.page;
   const info = page?.imageinfo?.[0];
 
   if (!page || !info) return null;
@@ -457,12 +503,53 @@ async function searchCommonsImage(searchQuery: string, landmark: string) {
   };
 }
 
-async function getCommonsImage(searchQuery: string, landmark: string) {
+async function getWikipediaLeadImage(landmark: string, city: string, country: string) {
+  const titles = Array.from(new Set([
+    landmark,
+    `${landmark} (${city})`,
+    `${landmark} (${country})`,
+    `${landmark}, ${city}`,
+  ].filter(Boolean)));
+
+  for (const title of titles) {
+    const apiUrl = new URL("https://en.wikipedia.org/w/api.php");
+    apiUrl.searchParams.set("action", "query");
+    apiUrl.searchParams.set("format", "json");
+    apiUrl.searchParams.set("redirects", "1");
+    apiUrl.searchParams.set("prop", "pageimages|info");
+    apiUrl.searchParams.set("inprop", "url");
+    apiUrl.searchParams.set("pithumbsize", "1400");
+    apiUrl.searchParams.set("titles", title);
+    apiUrl.searchParams.set("origin", "*");
+
+    const response = await fetch(apiUrl, {
+      headers: { "user-agent": "WorldQuestAtlas/1.0 educational quiz" },
+    });
+    const payload = await response.json() as { query?: { pages?: Record<string, WikipediaPage & { missing?: string }> } };
+    const page = Object.values(payload.query?.pages ?? {}).find((item) => !("missing" in item) && item.thumbnail?.source);
+
+    if (page?.thumbnail?.source && titleMatchesLandmark(page.title || "", landmark)) {
+      return {
+        imageUrl: page.thumbnail.source,
+        imageSourceUrl: page.fullurl || "https://en.wikipedia.org",
+        imageTitle: page.title || landmark,
+      };
+    }
+  }
+
+  return null;
+}
+
+async function getCommonsImage(searchQuery: string, landmark: string, city: string, country: string) {
+  const leadImage = await getWikipediaLeadImage(landmark, city, country);
+  if (leadImage) return leadImage;
+
   const queries = Array.from(new Set([
+    `intitle:"${landmark}"`,
     `${landmark} photograph`,
     `"${landmark}" photograph`,
+    `${landmark} ${city}`,
     landmark,
-    searchQuery,
   ].filter(Boolean)));
 
   for (const query of queries) {
@@ -583,7 +670,12 @@ export const getRandomGeminiQuiz = createServerFn({ method: "POST" })
       quiz = fallbackQuiz;
     }
 
-    const image = await getCommonsImage(quiz.searchQuery || `${quiz.monument} ${quiz.country} photograph`, quiz.monument);
+    const image = await getCommonsImage(
+      quiz.searchQuery || `${quiz.monument} ${quiz.country} photograph`,
+      quiz.monument,
+      quiz.city,
+      quiz.country,
+    );
 
     return {
       ...quiz,
