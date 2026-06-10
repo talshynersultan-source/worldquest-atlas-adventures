@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "@tanstack/react-router";
-import { getGeminiHint, getRandomGeminiQuiz } from "@/lib/api/gemini.functions";
+import { getRandomGeminiQuiz } from "@/lib/api/gemini.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -262,17 +262,19 @@ function StudyNote({
   city,
   country,
   explanation,
+  compact = false,
 }: {
   monument: string;
   city: string;
   country: string;
   explanation: string;
+  compact?: boolean;
 }) {
   const note = noteTextRu(monument, city, country, explanation);
 
   return (
     <div
-      className="mt-3 rounded-xl border-2 border-primary/20 p-4 text-sm text-foreground shadow-sm"
+      className={`${compact ? "rounded-lg p-2 text-[11px]" : "mt-3 rounded-xl p-4 text-sm"} border-2 border-primary/20 text-foreground shadow-sm`}
       style={{
         backgroundColor: "#fffdf8",
         backgroundImage:
@@ -280,14 +282,19 @@ function StudyNote({
         backgroundSize: "100% 28px, 18px 18px",
       }}
     >
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <div className="text-base font-black tracking-wide text-primary">ЗАМЕТКИ</div>
-        <div className="text-3xl drop-shadow-sm">☀️</div>
+      <div className={`flex items-center justify-between gap-2 ${compact ? "mb-1" : "mb-2"}`}>
+        <div className={`${compact ? "text-xs" : "text-base"} font-black tracking-wide text-primary`}>ЗАМЕТКИ</div>
+        <div className={`${compact ? "text-lg" : "text-3xl"} drop-shadow-sm`}>☀️</div>
       </div>
-      <div className="space-y-1 leading-6">
+      <div className={compact ? "space-y-0.5 leading-4" : "space-y-1 leading-6"}>
         <p><b>Название:</b> {note.monument}</p>
         <p><b>Место:</b> {note.place}</p>
-        <p><b>Почему запомнить:</b> {note.explanation}</p>
+        <p
+          className={compact ? "overflow-hidden" : ""}
+          style={compact ? { display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" } : undefined}
+        >
+          <b>Почему:</b> {note.explanation}
+        </p>
       </div>
     </div>
   );
@@ -311,9 +318,6 @@ function Index() {
   const [transitionKind, setTransitionKind] = useState<"plane" | "globe">("plane");
   const [confetti, setConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [aiHint, setAiHint] = useState<string | null>(null);
-  const [aiHintLoading, setAiHintLoading] = useState(false);
-  const [aiHintError, setAiHintError] = useState<string | null>(null);
   const [randomQuiz, setRandomQuiz] = useState<RandomQuiz | null>(null);
   const [randomAnswer, setRandomAnswer] = useState("");
   const [randomFeedback, setRandomFeedback] = useState<null | { kind: "correct" | "close" | "wrong"; text: string }>(null);
@@ -361,33 +365,6 @@ function Index() {
 
   const resetQuestionHelpers = () => {
     setShowHint(false);
-    setAiHint(null);
-    setAiHintError(null);
-    setAiHintLoading(false);
-  };
-
-  const askGeminiHint = async () => {
-    if (!level || !question || aiHintLoading) return;
-    setAiHintLoading(true);
-    setAiHintError(null);
-    try {
-      const result = await getGeminiHint({
-        data: {
-          city: level.city,
-          country: level.country,
-          monument: level.monument,
-          questionRu: question.qRu,
-          questionEn: question.q,
-          acceptedAnswers: question.answers,
-        },
-      });
-      setAiHint(result.hint);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Gemini did not answer.";
-      setAiHintError(message);
-    } finally {
-      setAiHintLoading(false);
-    }
   };
 
   const loadRandomQuiz = async () => {
@@ -753,25 +730,25 @@ function Index() {
           )}
 
           {!randomLoading && randomRoundAnswered >= 7 && (
-            <div className="flex flex-1 items-center justify-center rounded-2xl bg-card/90 p-5 shadow-xl">
-              <div className="w-full max-w-3xl">
-                <div className="rounded-2xl border-l-4 border-primary bg-primary/5 p-5 text-center">
+            <div className="flex flex-1 items-start justify-center rounded-2xl bg-card/90 p-3 shadow-xl md:items-center">
+              <div className="w-full max-w-5xl">
+                <div className="rounded-2xl border-l-4 border-primary bg-primary/5 p-3 text-center">
                   <div className="text-sm font-bold uppercase tracking-wide text-primary">Итог раунда</div>
-                  <h2 className="mt-2 text-4xl font-black">{randomRoundCorrect} / 7</h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <h2 className="mt-1 text-3xl font-black">{randomRoundCorrect} / 7</h2>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Правильных ответов за эти 7 вопросов
                   </p>
                 </div>
 
-                <div className="mt-5">
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <h3 className="text-xl font-black">ЗАМЕТКИ ☀️</h3>
+                <div className="mt-3">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <h3 className="text-lg font-black">ЗАМЕТКИ ☀️</h3>
                     <span className="rounded-full bg-secondary/30 px-3 py-1 text-xs font-bold">
                       {randomRoundNotes.length} слов
                     </span>
                   </div>
                   {randomRoundNotes.length > 0 ? (
-                    <div className="grid gap-3 md:grid-cols-2">
+                    <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
                       {randomRoundNotes.map((note) => (
                         <StudyNote
                           key={`${note.country}-${note.city}-${note.monument}`}
@@ -779,6 +756,7 @@ function Index() {
                           city={note.city}
                           country={note.country}
                           explanation={note.explanation}
+                          compact
                         />
                       ))}
                     </div>
@@ -789,7 +767,7 @@ function Index() {
                   )}
                 </div>
 
-                <div className="mt-5 flex flex-wrap justify-center gap-3">
+                <div className="mt-3 flex flex-wrap justify-center gap-3">
                   <Button onClick={startNextRandomRound} className="rounded-full px-8">
                     Следующие 7 вопросов
                   </Button>
@@ -1227,33 +1205,6 @@ function Index() {
               </Button>
             </div>
             )}
-
-            <div className="mt-2 rounded-xl border border-primary/20 bg-primary/5 p-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <div className="text-xs font-bold text-primary">Gemini-подсказка</div>
-                  <p className="text-[11px] text-muted-foreground">Умная подсказка без прямого ответа</p>
-                </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  onClick={askGeminiHint}
-                  disabled={aiHintLoading || !!feedback}
-                  className="h-9 rounded-full px-3 text-xs"
-                >
-                  {aiHintLoading ? "Думаю..." : "AI подсказка"}
-                </Button>
-              </div>
-              {(aiHint || aiHintError) && (
-                <div className={`mt-2 rounded-lg p-2 text-xs ${
-                  aiHintError ? "bg-destructive/10 text-destructive" : "bg-card/70 text-foreground"
-                }`}>
-                  {aiHintError || aiHint}
-                </div>
-              )}
-            </div>
-
             {/* Hint — floats above as overlay so the input never gets pushed off-screen */}
             <div className="relative mt-2">
             {!showHint ? (
