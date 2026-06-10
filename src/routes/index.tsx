@@ -884,7 +884,6 @@ function Index() {
               🔄 Начать заново
             </button>
           )}
-          <p className="mt-6 text-sm text-foreground/70">7 stops · 21 questions · 1 world</p>
         </div>
       </div>
     );
