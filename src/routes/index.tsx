@@ -43,6 +43,9 @@ type StudyNoteEntry = {
   country: string;
   explanation: string;
 };
+type PlayerMissEntry = StudyNoteEntry & {
+  source: "Обычный квиз" | "Random quiz";
+};
 const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
 
 function PlaneSVG() {
@@ -328,6 +331,8 @@ function Index() {
   const [randomRoundAnswered, setRandomRoundAnswered] = useState(0);
   const [randomRoundCorrect, setRandomRoundCorrect] = useState(0);
   const [randomRoundNotes, setRandomRoundNotes] = useState<StudyNoteEntry[]>([]);
+  const [showProfile, setShowProfile] = useState(false);
+  const [missedNotes, setMissedNotes] = useState<PlayerMissEntry[]>([]);
 
   // Load profile + progress when signed in
   useEffect(() => {
@@ -360,12 +365,53 @@ function Index() {
     })();
   }, [user]);
 
+  useEffect(() => {
+    if (!user || typeof window === "undefined") {
+      setMissedNotes([]);
+      return;
+    }
+    try {
+      const raw = window.localStorage.getItem(`worldquest-missed-${user.id}`);
+      setMissedNotes(raw ? JSON.parse(raw) : []);
+    } catch {
+      setMissedNotes([]);
+    }
+  }, [user?.id]);
+
   const level = LEVELS[levelIdx];
   const question = level?.questions[qIdx];
 
   const resetQuestionHelpers = () => {
     setShowHint(false);
   };
+
+  const missedStorageKey = user ? `worldquest-missed-${user.id}` : "";
+
+  const saveMissedNotes = (notes: PlayerMissEntry[]) => {
+    if (typeof window !== "undefined" && missedStorageKey) {
+      window.localStorage.setItem(missedStorageKey, JSON.stringify(notes));
+    }
+  };
+
+  const rememberMissed = (entry: PlayerMissEntry) => {
+    setMissedNotes((items) => {
+      const withoutSame = items.filter((item) => item.monument.toLowerCase() !== entry.monument.toLowerCase());
+      const next = [entry, ...withoutSame].slice(0, 8);
+      saveMissedNotes(next);
+      return next;
+    });
+  };
+
+  const clearMissedNotes = () => {
+    setMissedNotes([]);
+    if (typeof window !== "undefined" && missedStorageKey) {
+      window.localStorage.removeItem(missedStorageKey);
+    }
+  };
+
+  const youtubeUrl = (entry: StudyNoteEntry) => (
+    `https://www.youtube.com/results?search_query=${encodeURIComponent(`${entry.monument} ${entry.city} landmark`)}`
+  );
 
   const loadRandomQuiz = async () => {
     setScreen("random");
@@ -402,13 +448,14 @@ function Index() {
   };
 
   const saveRandomRoundNote = (quiz: RandomQuiz) => {
+    const note = {
+      monument: quiz.monument,
+      city: quiz.city,
+      country: quiz.country,
+      explanation: quiz.explanation,
+    };
+    rememberMissed({ ...note, source: "Random quiz" });
     setRandomRoundNotes((notes) => {
-      const note = {
-        monument: quiz.monument,
-        city: quiz.city,
-        country: quiz.country,
-        explanation: quiz.explanation,
-      };
       const withoutSame = notes.filter((item) => item.monument.toLowerCase() !== quiz.monument.toLowerCase());
       return [note, ...withoutSame].slice(0, 7);
     });
@@ -475,6 +522,7 @@ function Index() {
     setLevelIdx(0); setQIdx(0); setLevelCorrect(0);
     setScore(0); setMoney(0);
     setInput(""); setFeedback(null);
+    clearMissedNotes();
     setScreen("home");
   };
 
@@ -514,6 +562,15 @@ function Index() {
     setMoney(newMoney);
     setStats((s) => ({ ...s, total_correct: newTotalCorrect, total_wrong: newTotalWrong, best_score: newBest }));
     setFeedback({ kind: res, msg, explain: feedbackExplainRu(level.monument, question.explain), gain });
+    if (res !== "correct") {
+      rememberMissed({
+        monument: level.monument,
+        city: level.city,
+        country: level.country,
+        explanation: question.explain || level.fact,
+        source: "Обычный квиз",
+      });
+    }
     if (res === "correct") {
       setConfetti(true);
       window.setTimeout(() => setConfetti(false), 1400);
@@ -618,10 +675,104 @@ function Index() {
       <div className="relative min-h-screen overflow-hidden">
         <img src={heroImg} alt="World landmarks collage" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background/90" />
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-3 rounded-full bg-card/90 px-4 py-2 shadow">
-          <span className="text-sm font-bold">👋 {user.email}</span>
-          <button onClick={signOut} className="text-xs text-muted-foreground hover:text-foreground">Sign out</button>
+        <div className="absolute right-4 top-4 z-30 flex max-w-[92vw] items-center gap-2 rounded-full bg-card/90 px-3 py-2 shadow">
+          <button
+            onClick={() => setShowProfile((value) => !value)}
+            className="flex min-w-0 items-center gap-2 text-left text-sm font-bold"
+            aria-label="Открыть профиль игрока"
+          >
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15">👤</span>
+            <span className="max-w-[180px] truncate">{displayName || user.email}</span>
+          </button>
+          <button onClick={signOut} className="shrink-0 text-xs text-muted-foreground hover:text-foreground">Выйти</button>
         </div>
+        {showProfile && (
+          <>
+            <button
+              className="fixed inset-0 z-20 bg-transparent"
+              onClick={() => setShowProfile(false)}
+              aria-label="Закрыть профиль"
+            />
+            <div className="absolute right-4 top-16 z-30 w-[min(92vw,420px)] rounded-2xl border border-primary/20 bg-card/95 p-4 text-left shadow-2xl backdrop-blur">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs font-bold uppercase text-primary">ПРОФИЛЬ ИГРОКА</div>
+                  <div className="truncate text-lg font-black">{displayName || "Traveler"}</div>
+                  <div className="truncate text-xs text-muted-foreground">{user.email}</div>
+                </div>
+                <div className="text-3xl">👤</div>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded-xl bg-primary/10 p-2">
+                  <div className="text-muted-foreground">Прогресс</div>
+                  <b>{completedLevels.size}/{LEVELS.length}</b>
+                </div>
+                <div className="rounded-xl bg-secondary/20 p-2">
+                  <div className="text-muted-foreground">Best</div>
+                  <b>{stats.best_score}</b>
+                </div>
+                <div className="rounded-xl bg-accent/20 p-2">
+                  <div className="text-muted-foreground">Правильно</div>
+                  <b>{stats.total_correct}</b>
+                </div>
+                <div className="rounded-xl bg-destructive/10 p-2">
+                  <div className="text-muted-foreground">Ошибки</div>
+                  <b>{stats.total_wrong}</b>
+                </div>
+                <div className="rounded-xl bg-background/80 p-2 ring-1 ring-border">
+                  <div className="text-muted-foreground">Score</div>
+                  <b>{score}</b>
+                </div>
+                <div className="rounded-xl bg-background/80 p-2 ring-1 ring-border">
+                  <div className="text-muted-foreground">Money</div>
+                  <b>{money}</b>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-black">Ошибки для повторения ☀️</h3>
+                  {missedNotes.length > 0 && (
+                    <button onClick={clearMissedNotes} className="text-xs text-muted-foreground underline hover:text-foreground">
+                      очистить
+                    </button>
+                  )}
+                </div>
+                {missedNotes.length > 0 ? (
+                  <div className="space-y-2 overflow-hidden">
+                    {missedNotes.slice(0, 5).map((entry) => {
+                      const note = noteTextRu(entry.monument, entry.city, entry.country, entry.explanation);
+                      return (
+                        <div key={`${entry.source}-${entry.country}-${entry.city}-${entry.monument}`} className="rounded-xl bg-background/85 p-2 text-xs ring-1 ring-border">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="truncate font-black">{note.monument}</div>
+                              <div className="truncate text-muted-foreground">{note.place} · {entry.source}</div>
+                            </div>
+                            <a
+                              href={youtubeUrl(entry)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="shrink-0 rounded-full bg-red-500 px-2 py-1 font-bold text-white shadow-sm hover:bg-red-600"
+                            >
+                              YouTube
+                            </a>
+                          </div>
+                          <div className="mt-1 line-clamp-2 text-muted-foreground">{note.explanation}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="rounded-xl bg-primary/10 p-3 text-center text-xs font-bold">
+                    Пока ошибок нет. Отличный старт!
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
         <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center">
           <div className="mb-4 flex flex-wrap justify-center gap-2 text-3xl">
             {FLAGS.map((f) => <span key={f} className="drop-shadow-lg">{f}</span>)}
