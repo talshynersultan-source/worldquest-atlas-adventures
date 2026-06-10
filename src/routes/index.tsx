@@ -37,6 +37,12 @@ type RandomQuiz = {
   imageTitle: string;
 };
 type RecentRandomQuiz = Pick<RandomQuiz, "country" | "city" | "monument">;
+type StudyNoteEntry = {
+  monument: string;
+  city: string;
+  country: string;
+  explanation: string;
+};
 const FLAGS = ["🇫🇷", "🇺🇸", "🇯🇵", "🇨🇳", "🇬🇧", "🇮🇹", "🇧🇷", "🇦🇪"];
 
 function PlaneSVG() {
@@ -209,6 +215,9 @@ function Index() {
   const [randomError, setRandomError] = useState<string | null>(null);
   const [randomHintVisible, setRandomHintVisible] = useState(false);
   const [recentRandomQuizzes, setRecentRandomQuizzes] = useState<RecentRandomQuiz[]>([]);
+  const [randomRoundAnswered, setRandomRoundAnswered] = useState(0);
+  const [randomRoundCorrect, setRandomRoundCorrect] = useState(0);
+  const [randomRoundNotes, setRandomRoundNotes] = useState<StudyNoteEntry[]>([]);
 
   // Load profile + progress when signed in
   useEffect(() => {
@@ -309,22 +318,46 @@ function Index() {
     }
   };
 
+  const saveRandomRoundNote = (quiz: RandomQuiz) => {
+    setRandomRoundNotes((notes) => {
+      const note = {
+        monument: quiz.monument,
+        city: quiz.city,
+        country: quiz.country,
+        explanation: quiz.explanation,
+      };
+      const withoutSame = notes.filter((item) => item.monument.toLowerCase() !== quiz.monument.toLowerCase());
+      return [note, ...withoutSame].slice(0, 7);
+    });
+  };
+
+  const startNextRandomRound = () => {
+    setRandomRoundAnswered(0);
+    setRandomRoundCorrect(0);
+    setRandomRoundNotes([]);
+    void loadRandomQuiz();
+  };
+
   const submitRandomQuiz = (e: React.FormEvent) => {
     e.preventDefault();
     if (!randomQuiz || randomFeedback) return;
     const result = checkAnswer(randomAnswer, randomQuiz.acceptedAnswers);
+    setRandomRoundAnswered((value) => Math.min(7, value + 1));
     setRandomHintVisible(false);
     if (result === "correct") {
       setRandomFeedback({ kind: "correct", text: `Правильно! ${randomQuiz.explanation}` });
+      setRandomRoundCorrect((value) => Math.min(7, value + 1));
       setScore((value) => value + 10);
       setMoney((value) => value + 5);
       return;
     }
     if (result === "close") {
       setRandomFeedback({ kind: "close", text: `Почти! Ответ: ${randomQuiz.monument}. ${randomQuiz.explanation}` });
+      saveRandomRoundNote(randomQuiz);
       setScore((value) => value + 5);
       return;
     }
+    saveRandomRoundNote(randomQuiz);
     setRandomFeedback({ kind: "wrong", text: `Не совсем. Ответ: ${randomQuiz.monument}. ${randomQuiz.explanation}` });
   };
 
@@ -524,7 +557,7 @@ function Index() {
               {completedLevels.size > 0 && completedLevels.size < LEVELS.length ? "CONTINUE" : "PLAY"}
             </Button>
             <Button
-              onClick={() => void loadRandomQuiz()}
+              onClick={startNextRandomRound}
               variant="secondary"
               className="h-14 flex-1 rounded-full px-8 text-xl font-bold shadow-lg transition hover:scale-105"
             >
@@ -585,6 +618,7 @@ function Index() {
             </button>
             <div className="font-bold">AI Random Quiz</div>
             <div className="flex items-center gap-3">
+              <span>{Math.min(randomRoundAnswered + (randomFeedback ? 0 : 1), 7)} / 7</span>
               <span>Score {score}</span>
               <span>Money {money}</span>
             </div>
@@ -612,7 +646,56 @@ function Index() {
             </div>
           )}
 
-          {!randomLoading && randomQuiz && (
+          {!randomLoading && randomRoundAnswered >= 7 && (
+            <div className="flex flex-1 items-center justify-center rounded-2xl bg-card/90 p-5 shadow-xl">
+              <div className="w-full max-w-3xl">
+                <div className="rounded-2xl border-l-4 border-primary bg-primary/5 p-5 text-center">
+                  <div className="text-sm font-bold uppercase tracking-wide text-primary">Итог раунда</div>
+                  <h2 className="mt-2 text-4xl font-black">{randomRoundCorrect} / 7</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Правильных ответов за эти 7 вопросов
+                  </p>
+                </div>
+
+                <div className="mt-5">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <h3 className="text-xl font-black">ЗАМЕТКИ ☀️</h3>
+                    <span className="rounded-full bg-secondary/30 px-3 py-1 text-xs font-bold">
+                      {randomRoundNotes.length} слов
+                    </span>
+                  </div>
+                  {randomRoundNotes.length > 0 ? (
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {randomRoundNotes.map((note) => (
+                        <StudyNote
+                          key={`${note.country}-${note.city}-${note.monument}`}
+                          monument={note.monument}
+                          city={note.city}
+                          country={note.country}
+                          explanation={note.explanation}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl bg-primary/10 p-4 text-center font-bold">
+                      Отлично! Ошибок в этом раунде не было.
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-5 flex flex-wrap justify-center gap-3">
+                  <Button onClick={startNextRandomRound} className="rounded-full px-8">
+                    Следующие 7 вопросов
+                  </Button>
+                  <Button onClick={() => setScreen("home")} variant="secondary" className="rounded-full px-8">
+                    На главную
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!randomLoading && randomRoundAnswered < 7 && randomQuiz && (
             <div className="grid flex-1 gap-3 pb-4 md:grid-cols-2 md:items-stretch">
               <div className="overflow-hidden rounded-2xl bg-card shadow-xl md:min-h-0">
                 {randomQuiz.imageUrl ? (
