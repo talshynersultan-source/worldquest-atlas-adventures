@@ -791,53 +791,59 @@ function Index() {
               AI Random Quiz
             </Button>
           </div>
-          <div className="mt-4 w-full max-w-xl rounded-2xl bg-card/85 p-3 text-left shadow-lg backdrop-blur">
+          <div className={showProfile ? "mt-4 w-full max-w-xl rounded-2xl bg-card/85 p-3 text-left shadow-lg backdrop-blur" : "mt-4 flex justify-center"}>
             <button
               onClick={() => setShowProfile((value) => !value)}
-              className="flex w-full items-center justify-between gap-3 text-left"
+              className={showProfile ? "flex w-full items-center justify-between gap-3 text-left" : "flex h-14 w-14 items-center justify-center rounded-full bg-card/90 text-3xl shadow-lg backdrop-blur transition hover:scale-105"}
               aria-label="Открыть профиль игрока"
             >
-              <div className="flex min-w-0 items-center gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/15 text-2xl">👤</span>
-                <div className="min-w-0">
-                  <div className="truncate text-base font-black">Профиль игрока</div>
-                  <div className="truncate text-xs text-muted-foreground">{displayName || user.email}</div>
-                </div>
-              </div>
-              <span className="shrink-0 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold">
-                {showProfile ? "Скрыть" : "Открыть"}
-              </span>
+              {showProfile ? (
+                <>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/15 text-2xl">👤</span>
+                    <div className="min-w-0">
+                      <div className="truncate text-base font-black">Профиль игрока</div>
+                      <div className="truncate text-xs text-muted-foreground">{displayName || user.email}</div>
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold">
+                    Скрыть
+                  </span>
+                </>
+              ) : (
+                <span>👤</span>
+              )}
             </button>
 
-            <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
-              <div className="rounded-xl bg-background/80 p-2">
-                <div className="text-muted-foreground">Progress</div>
-                <b>{completedLevels.size}/{LEVELS.length}</b>
-              </div>
-              <div className="rounded-xl bg-background/80 p-2">
-                <div className="text-muted-foreground">Score</div>
-                <b>{score}</b>
-              </div>
-              <div className="rounded-xl bg-background/80 p-2">
-                <div className="text-muted-foreground">Money</div>
-                <b>{money}</b>
-              </div>
-              <div className="rounded-xl bg-background/80 p-2">
-                <div className="text-muted-foreground">Best</div>
-                <b>{stats.best_score}</b>
-              </div>
-              <div className="rounded-xl bg-background/80 p-2">
-                <div className="text-muted-foreground">Верно</div>
-                <b>{stats.total_correct}</b>
-              </div>
-              <div className="rounded-xl bg-background/80 p-2">
-                <div className="text-muted-foreground">Ошибки</div>
-                <b>{stats.total_wrong}</b>
-              </div>
-            </div>
-
             {showProfile && (
-              <div className="mt-3 rounded-xl bg-background/75 p-3 text-xs ring-1 ring-border">
+              <>
+                <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
+                  <div className="rounded-xl bg-background/80 p-2">
+                    <div className="text-muted-foreground">Progress</div>
+                    <b>{completedLevels.size}/{LEVELS.length}</b>
+                  </div>
+                  <div className="rounded-xl bg-background/80 p-2">
+                    <div className="text-muted-foreground">Score</div>
+                    <b>{score}</b>
+                  </div>
+                  <div className="rounded-xl bg-background/80 p-2">
+                    <div className="text-muted-foreground">Money</div>
+                    <b>{money}</b>
+                  </div>
+                  <div className="rounded-xl bg-background/80 p-2">
+                    <div className="text-muted-foreground">Best</div>
+                    <b>{stats.best_score}</b>
+                  </div>
+                  <div className="rounded-xl bg-background/80 p-2">
+                    <div className="text-muted-foreground">Верно</div>
+                    <b>{stats.total_correct}</b>
+                  </div>
+                  <div className="rounded-xl bg-background/80 p-2">
+                    <div className="text-muted-foreground">Ошибки</div>
+                    <b>{stats.total_wrong}</b>
+                  </div>
+                </div>
+                <div className="mt-3 rounded-xl bg-background/75 p-3 text-xs ring-1 ring-border">
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <h3 className="font-black">Ошибки для повторения ☀️</h3>
                   {missedNotes.length > 0 && (
@@ -874,6 +880,7 @@ function Index() {
                   <div className="rounded-lg bg-primary/10 p-2 text-center font-bold">Пока ошибок нет</div>
                 )}
               </div>
+              </>
             )}
           </div>
           {completedLevels.size > 0 && (
